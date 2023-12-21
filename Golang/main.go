@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// Nom du fichier d'entrée
-	inputFileName := "C:/Users/baptr/Documents/INSA/TC/GO/ELP/Golang/texte.txt"
+	inputFileName := "C:/Users/Gauthier/Desktop/TC/TC3/PROJETS/ELP/Golang/texte.txt"
 
 	// Nom du fichier de sortie
 	outputFileName := "output.txt"

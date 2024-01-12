@@ -23,12 +23,15 @@ const (
 	screenWidth          = 1000
 	screenHeight         = 1000
 	numBoids             = 75
-	maxForce             = 1.0
 	maxSpeed             = 4.0
+	alignForce           = 1.0
+	cohesionForce        = 0.9
+	separationForce      = 1.8
+	wallsForce           = 5.0
 	alignPerception      = 75.0
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
-	wallsPerception      = 100.0
+	wallsPerception      = 50.0
 	endpointPerception   = 200
 )
 
@@ -179,26 +182,26 @@ func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D) {
 		separationSteering.Divide(float64(separationTotal))
 		separationSteering.SetMagnitude(maxSpeed)
 		separationSteering.Subtract(boid.velocity)
-		separationSteering.SetMagnitude(maxForce * 1.8)
+		separationSteering.SetMagnitude(separationForce)
 	}
 	if cohesionTotal > 0 {
 		cohesionSteering.Divide(float64(cohesionTotal))
 		cohesionSteering.Subtract(boid.position)
 		cohesionSteering.SetMagnitude(maxSpeed)
 		cohesionSteering.Subtract(boid.velocity)
-		cohesionSteering.SetMagnitude(maxForce * 0.9)
+		cohesionSteering.SetMagnitude(cohesionForce)
 	}
 	if alignTotal > 0 {
 		alignSteering.Divide(float64(alignTotal))
 		alignSteering.SetMagnitude(maxSpeed)
 		alignSteering.Subtract(boid.velocity)
-		alignSteering.Limit(maxForce)
+		alignSteering.Limit(alignForce)
 	}
 	if wallsTotal > 0 {
 		wallsSteering.Divide(float64(wallsTotal))
 		wallsSteering.SetMagnitude(maxSpeed)
 		wallsSteering.Subtract(boid.velocity)
-		wallsSteering.SetMagnitude(maxForce * 10)
+		wallsSteering.SetMagnitude(wallsForce)
 	}
 
 	boid.acceleration.Add(wallsSteering)
@@ -265,7 +268,7 @@ func (g *Game) init() {
 	for i := range g.flock.boids {
 		w, h := birdImage.Size()
 		x, y := rand.Float64()*float64(screenWidth-w), rand.Float64()*float64(screenWidth-h)
-		min, max := -maxForce, maxForce
+		min, max := -1.0, 1.0
 		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
 		g.flock.boids[i] = &Boid{
 			imageWidth:   w,
@@ -290,6 +293,36 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 	op := ebiten.DrawImageOptions{}
 	w, h := birdImage.Size()
+
+	file, err := os.Open("Golang/walls/walls.csv")
+	if err != nil {
+		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
+	}
+	defer file.Close()
+
+	// Création d'un lecteur CSV
+	reader := csv.NewReader(file)
+
+	// Lecture des lignes du fichier
+	for {
+		// Lecture d'une ligne du fichier
+		record, err := reader.Read()
+
+		// Vérification de la fin du fichier
+		if err != nil {
+			break
+		}
+
+		x1, err := strconv.ParseFloat(record[0], 64)
+		x2, err := strconv.ParseFloat(record[2], 64)
+		y1, err := strconv.ParseFloat(record[1], 64)
+		y2, err := strconv.ParseFloat(record[3], 64)
+
+		ebitenutil.DrawLine(screen, x1+1, y1+1, x2+1, y2+1, color.Black)
+		ebitenutil.DrawLine(screen, x1, y1, x2, y2, color.Black)
+		ebitenutil.DrawLine(screen, x1-1, y1-1, x2-1, y2-1, color.Black)
+	}
+
 	for _, boid := range g.flock.boids {
 		op.GeoM.Reset()
 		op.GeoM.Translate(-float64(w)/2, -float64(h)/2)

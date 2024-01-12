@@ -12,9 +12,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Sorohpsoe/ELP/Golang/2d"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"github.com/healeycodes/boids/vector"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type Vector2D = vector.Vector2D
@@ -28,11 +29,12 @@ const (
 	cohesionForce        = 0.9
 	separationForce      = 1.8
 	wallsForce           = 5.0
+	endpointsForce       = 5.0
 	alignPerception      = 75.0
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
 	wallsPerception      = 50.0
-	endpointPerception   = 200
+	endpointsPerception  = 300.0
 )
 
 var (
@@ -82,9 +84,9 @@ func init_walls() []Vector2D {
 
 }
 
-func init_endpoint() []Vector2D {
+func init_endpoints() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("Golang/endpoint/endpoint.csv")
+	file, err := os.Open("Golang/endpoints/endpoints.csv")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -93,7 +95,7 @@ func init_endpoint() []Vector2D {
 	// Création d'un lecteur CSV
 	reader := csv.NewReader(file)
 
-	var endpoint_point []Vector2D
+	var endpoints_points []Vector2D
 
 	for {
 		// Lecture d'une ligne du fichier
@@ -106,9 +108,10 @@ func init_endpoint() []Vector2D {
 
 		x, err := strconv.ParseFloat(record[0], 64)
 		y, err := strconv.ParseFloat(record[1], 64)
-		endpoint_point = append(endpoint_point, Vector2D{X: x, Y: y})
+		endpoints_points = append(endpoints_points, Vector2D{X: x, Y: y})
 	}
-	return endpoint_point
+
+	return endpoints_points
 
 }
 
@@ -133,7 +136,7 @@ type Boid struct {
 	acceleration Vector2D
 }
 
-func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D) {
+func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D, endpoints_points []Vector2D) {
 	alignSteering := Vector2D{}
 	alignTotal := 0
 	cohesionSteering := Vector2D{}
@@ -142,6 +145,8 @@ func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D) {
 	separationTotal := 0
 	wallsSteering := Vector2D{}
 	wallsTotal := 0
+	endpointsSteering := Vector2D{}
+	endpointsTotal := 0
 
 	for _, other := range restOfFlock {
 		d := boid.position.Distance(other.position)
@@ -178,6 +183,19 @@ func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D) {
 
 	}
 
+	for _, point := range endpoints_points {
+		d := boid.position.Distance(point)
+
+		if d < endpointsPerception {
+			endpointsTotal++
+			diff := boid.position
+			diff.Subtract(point)
+			diff.Divide(d)
+			endpointsSteering.Add(diff)
+		}
+
+	}
+
 	if separationTotal > 0 {
 		separationSteering.Divide(float64(separationTotal))
 		separationSteering.SetMagnitude(maxSpeed)
@@ -203,13 +221,21 @@ func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D) {
 		wallsSteering.Subtract(boid.velocity)
 		wallsSteering.SetMagnitude(wallsForce)
 	}
+	if endpointsTotal > 0 {
+		endpointsSteering.Divide(float64(endpointsTotal))
+		endpointsSteering.Subtract(boid.position)
+		endpointsSteering.SetMagnitude(maxSpeed)
+		endpointsSteering.Subtract(boid.velocity)
+		endpointsSteering.SetMagnitude(endpointsForce)
+	}
 
 	boid.acceleration.Add(wallsSteering)
 	boid.acceleration.Add(alignSteering)
 	boid.acceleration.Add(cohesionSteering)
 	boid.acceleration.Add(separationSteering)
+	boid.acceleration.Add(endpointsSteering)
 
-	boid.acceleration.Divide(4)
+	boid.acceleration.Divide(5)
 
 	i := 0
 	if math.IsNaN(boid.acceleration.X) || math.IsNaN(boid.acceleration.Y) {
@@ -242,19 +268,19 @@ type Flock struct {
 	boids []*Boid
 }
 
-func (flock *Flock) Logic(walls_points []Vector2D) {
+func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) {
 	for _, boid := range flock.boids {
 		boid.CheckEdges()
-		boid.ApplyRules(flock.boids, walls_points)
+		boid.ApplyRules(flock.boids, walls_points, endpoints_points)
 		boid.ApplyMovement()
 	}
 }
 
 type Game struct {
-	flock        Flock
-	inited       bool
-	walls_points []Vector2D
-	endpoint     []Vector2D
+	flock            Flock
+	inited           bool
+	walls_points     []Vector2D
+	endpoints_points []Vector2D
 }
 
 func (g *Game) init() {
@@ -262,7 +288,7 @@ func (g *Game) init() {
 		g.inited = true
 	}()
 	g.walls_points = init_walls()
-	g.endpoint = init_endpoint()
+	g.endpoints_points = init_endpoints()
 	rand.Seed(time.Hour.Milliseconds())
 	g.flock.boids = make([]*Boid, numBoids)
 	for i := range g.flock.boids {
@@ -285,7 +311,7 @@ func (g *Game) Update(screen *ebiten.Image) error {
 		g.init()
 	}
 
-	g.flock.Logic(g.walls_points)
+	g.flock.Logic(g.walls_points, g.endpoints_points)
 	return nil
 }
 
@@ -321,6 +347,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		ebitenutil.DrawLine(screen, x1+1, y1+1, x2+1, y2+1, color.Black)
 		ebitenutil.DrawLine(screen, x1, y1, x2, y2, color.Black)
 		ebitenutil.DrawLine(screen, x1-1, y1-1, x2-1, y2-1, color.Black)
+	}
+
+	for _, endpoint := range g.endpoints_points {
+
+		vector.DrawFilledCircle(screen, float32(endpoint.X), float32(endpoint.Y), float32(5.0), color.Black)
+
 	}
 
 	for _, boid := range g.flock.boids {

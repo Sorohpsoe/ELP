@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/healeycodes/boids/vector"
@@ -19,18 +19,18 @@ type Time = time.Time
 const (
 	screenWidth          = 1000
 	screenHeight         = 1000
-	numBoids             = 100
+	numBoids             = 150
 	maxSpeed             = 4.0
 	alignForce           = 1.0
 	cohesionForce        = 0.8
 	separationForce      = 1.8
 	wallsForce           = 3.0
-	endpointsForce       = 0.9
+	endpointsForce       = 6
 	alignPerception      = 75.0
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
 	wallsPerception      = 50.0
-	endpointsPerception  = 350.0
+	endpointsPerception  = 400.0
 )
 
 func init_walls() []Vector2D {
@@ -278,7 +278,7 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 		boid.ApplyMovement()
 		if boid.Escape(endpoints_points, i) {
 			flock.nb_escaped++
-			fmt.Print(flock.nb_escaped, "/", numBoids, " boids échappés\n")
+
 		}
 
 	}
@@ -375,16 +375,51 @@ func new_sim() *Sim {
 	return &sim
 }
 
-func main() {
+func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	simulation := new_sim()
 
+	var elapsed_time time.Duration
+
 	for {
-		elapsed_time := simulation.Update()
+		elapsed_time = simulation.Update()
 		if simulation.ended {
-			fmt.Println("Fin de la simulation", elapsed_time)
+
 			break
 		}
 
+	}
+	fmt.Println("Fin de la simulation", elapsed_time)
+	ch <- elapsed_time
+}
+
+func main() {
+	var wg sync.WaitGroup
+	resultCh := make(chan time.Duration, 5) // Canal pour recueillir les résultats
+
+	// Lancer dix goroutines
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go run_sim(resultCh, &wg)
+	}
+
+	wg.Wait()
+	close(resultCh)
+
+	// Calculer la moyenne des résultats
+	var totalDuration time.Duration
+	var count int
+	for d := range resultCh {
+		totalDuration += d
+		count++
+	}
+
+	if count > 0 {
+		averageDuration := totalDuration / time.Duration(count)
+		fmt.Println("Moyenne des durées:", averageDuration)
+	} else {
+		fmt.Println("Aucun résultat n'a été reçu.")
 	}
 }

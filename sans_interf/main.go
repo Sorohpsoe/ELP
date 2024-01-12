@@ -3,17 +3,13 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"image/color"
-	_ "image/png"
-	"log"
+
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil"
 	"github.com/healeycodes/boids/vector"
 )
 
@@ -35,10 +31,6 @@ const (
 	separationPerception = 50.0
 	wallsPerception      = 50.0
 	endpointsPerception  = 350.0
-)
-
-var (
-	birdImage *ebiten.Image
 )
 
 func init_walls() []Vector2D {
@@ -115,22 +107,7 @@ func init_endpoints() []Vector2D {
 
 }
 
-func init() {
-	fish, _, err := ebitenutil.NewImageFromFile("Golang/fish/chevron-up.png", ebiten.FilterDefault)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w, h := fish.Size()
-	birdImage, _ = ebiten.NewImage(w, h, ebiten.FilterDefault)
-	op := &ebiten.DrawImageOptions{}
-	op.ColorM.Scale(1, 1, 1, 1)
-	birdImage.DrawImage(fish, op)
-}
-
 type Boid struct {
-	imageWidth   int
-	imageHeight  int
 	position     Vector2D
 	velocity     Vector2D
 	acceleration Vector2D
@@ -301,7 +278,7 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 		boid.ApplyMovement()
 		if boid.Escape(endpoints_points, i) {
 			flock.nb_escaped++
-			fmt.Print(flock.nb_escaped, "/", numBoids, " boids échappés")
+			fmt.Print(flock.nb_escaped, "/", numBoids, " boids échappés\n")
 		}
 
 	}
@@ -313,15 +290,16 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 	return end
 }
 
-type Game struct {
+type Sim struct {
 	flock            Flock
 	start            time.Time
 	inited           bool
+	ended            bool
 	walls_points     []Vector2D
 	endpoints_points []Vector2D
 }
 
-func (g *Game) init() {
+func (g *Sim) init() {
 	defer func() {
 		g.inited = true
 	}()
@@ -330,13 +308,12 @@ func (g *Game) init() {
 	rand.Seed(time.Hour.Milliseconds())
 	g.flock.boids = make([]*Boid, numBoids)
 	for i := range g.flock.boids {
-		w, h := birdImage.Size()
-		x, y := rand.Float64()*float64(screenWidth-w), rand.Float64()*float64(screenWidth-h)
+
+		x, y := rand.Float64()*float64(screenWidth), rand.Float64()*float64(screenWidth)
 		min, max := -1.0, 1.0
 		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
 		g.flock.boids[i] = &Boid{
-			imageWidth:   w,
-			imageHeight:  h,
+
 			position:     Vector2D{X: x, Y: y},
 			velocity:     Vector2D{X: vx, Y: vy},
 			acceleration: Vector2D{X: 0, Y: 0},
@@ -345,76 +322,69 @@ func (g *Game) init() {
 	g.start = time.Now()
 }
 
-func (g *Game) Update(screen *ebiten.Image) error {
+func (g *Sim) Update() time.Duration {
 	if !g.inited {
 		g.init()
 	}
-
+	now := time.Now()
+	duree := now.Sub(g.start)
 	if g.flock.Logic(g.walls_points, g.endpoints_points) {
-		end := time.Now()
-		duree := end.Sub(g.start)
-		fmt.Println("Fin du jeu", duree)
+
+		g.ended = true
 	}
-	return nil
+	return duree
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.White)
-	op := ebiten.DrawImageOptions{}
-	w, h := birdImage.Size()
-
-	file, err := os.Open("Golang/walls/walls.csv")
-	if err != nil {
-		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
+func new_flock() *Flock {
+	flock := Flock{
+		boids:      make([]*Boid, numBoids),
+		nb_escaped: 0,
 	}
-	defer file.Close()
 
-	// Création d'un lecteur CSV
-	reader := csv.NewReader(file)
+	return &flock
+}
 
-	// Lecture des lignes du fichier
-	for {
-		// Lecture d'une ligne du fichier
-		record, err := reader.Read()
+func new_sim() *Sim {
+	walls_points := init_walls()
+	endpoints_points := init_endpoints()
+	rand.Seed(time.Hour.Milliseconds())
+	flock := new_flock()
+	for i := range flock.boids {
 
-		// Vérification de la fin du fichier
-		if err != nil {
-			break
+		x, y := rand.Float64()*float64(screenWidth), rand.Float64()*float64(screenWidth)
+		min, max := -1.0, 1.0
+		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
+		flock.boids[i] = &Boid{
+
+			position:     Vector2D{X: x, Y: y},
+			velocity:     Vector2D{X: vx, Y: vy},
+			acceleration: Vector2D{X: 0, Y: 0},
 		}
+	}
+	start := time.Now()
 
-		x1, err := strconv.ParseFloat(record[0], 64)
-		x2, err := strconv.ParseFloat(record[2], 64)
-		y1, err := strconv.ParseFloat(record[1], 64)
-		y2, err := strconv.ParseFloat(record[3], 64)
-
-		ebitenutil.DrawLine(screen, x1+1, y1+1, x2+1, y2+1, color.Black)
-		ebitenutil.DrawLine(screen, x1, y1, x2, y2, color.Black)
-		ebitenutil.DrawLine(screen, x1-1, y1-1, x2-1, y2-1, color.Black)
+	sim := Sim{
+		flock:            *flock,
+		start:            start,
+		inited:           true,
+		ended:            false,
+		walls_points:     walls_points,
+		endpoints_points: endpoints_points,
 	}
 
-	for _, endpoint := range g.endpoints_points {
-
-		ebitenutil.DrawRect(screen, endpoint.X-15, endpoint.Y-15, 15, 15, color.Black)
-
-	}
-
-	for _, boid := range g.flock.boids {
-		op.GeoM.Reset()
-		op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
-		op.GeoM.Rotate(-1*math.Atan2(boid.velocity.Y*-1, boid.velocity.X) + math.Pi/2)
-		op.GeoM.Translate(boid.position.X, boid.position.Y)
-		screen.DrawImage(birdImage, &op)
-	}
-}
-
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return screenWidth, screenHeight
+	return &sim
 }
 
 func main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Boids")
-	if err := ebiten.RunGame(&Game{}); err != nil {
-		log.Fatal(err)
+
+	simulation := new_sim()
+
+	for {
+		elapsed_time := simulation.Update()
+		if simulation.ended {
+			fmt.Println("Fin de la simulation", elapsed_time)
+			break
+		}
+
 	}
 }

@@ -29,6 +29,7 @@ const (
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
 	wallsPerception      = 100.0
+	endpointPerception   = 200
 )
 
 var (
@@ -37,7 +38,7 @@ var (
 
 func init_walls() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("walls/walls.csv")
+	file, err := os.Open("Golang/walls/walls.csv")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -78,8 +79,38 @@ func init_walls() []Vector2D {
 
 }
 
+func init_endpoint() []Vector2D {
+	// Ouverture du fichier CSV
+	file, err := os.Open("Golang/endpoint/endpoint.csv")
+	if err != nil {
+		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
+	}
+	defer file.Close()
+
+	// Création d'un lecteur CSV
+	reader := csv.NewReader(file)
+
+	var endpoint_point []Vector2D
+
+	for {
+		// Lecture d'une ligne du fichier
+		record, err := reader.Read()
+
+		// Vérification de la fin du fichier
+		if err != nil {
+			break
+		}
+
+		x, err := strconv.ParseFloat(record[0], 64)
+		y, err := strconv.ParseFloat(record[1], 64)
+		endpoint_point = append(endpoint_point, Vector2D{X: x, Y: y})
+	}
+	return endpoint_point
+
+}
+
 func init() {
-	fish, _, err := ebitenutil.NewImageFromFile("fish/chevron-up.png", ebiten.FilterDefault)
+	fish, _, err := ebitenutil.NewImageFromFile("Golang/fish/chevron-up.png", ebiten.FilterDefault)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -220,6 +251,7 @@ type Game struct {
 	flock        Flock
 	inited       bool
 	walls_points []Vector2D
+	endpoint     []Vector2D
 }
 
 func (g *Game) init() {
@@ -227,6 +259,7 @@ func (g *Game) init() {
 		g.inited = true
 	}()
 	g.walls_points = init_walls()
+	g.endpoint = init_endpoint()
 	rand.Seed(time.Hour.Milliseconds())
 	g.flock.boids = make([]*Boid, numBoids)
 	for i := range g.flock.boids {

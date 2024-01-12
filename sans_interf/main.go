@@ -331,6 +331,7 @@ func (g *Sim) Update() time.Duration {
 	if g.flock.Logic(g.walls_points, g.endpoints_points) {
 
 		g.ended = true
+		fmt.Println("coucou ended")
 	}
 	return duree
 }
@@ -397,22 +398,19 @@ func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup) {
 
 func main() {
 	var wg sync.WaitGroup
-	resultCh := make(chan time.Duration, 5) // Canal pour recueillir les résultats
+	resultCh := make(chan time.Duration, 30) // Canal pour recueillir les résultats
 
 	// Lancer dix goroutines
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 20; i++ {
 		wg.Add(1)
 		go run_sim(resultCh, &wg)
 	}
 
-	wg.Wait()
-	close(resultCh)
-
 	// Calculer la moyenne des résultats
 	var totalDuration time.Duration
 	var count int
-	for d := range resultCh {
-		totalDuration += d
+	for i := 0; i < 5; i++ {
+		totalDuration += <-resultCh
 		count++
 	}
 

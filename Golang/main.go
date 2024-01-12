@@ -12,10 +12,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Sorohpsoe/ELP/Golang/2d"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/healeycodes/boids/vector"
 )
 
 type Vector2D = vector.Vector2D
@@ -28,8 +27,8 @@ const (
 	alignForce           = 1.0
 	cohesionForce        = 0.9
 	separationForce      = 1.8
-	wallsForce           = 5.0
-	endpointsForce       = 5.0
+	wallsForce           = 3.0
+	endpointsForce       = 1.1
 	alignPerception      = 75.0
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
@@ -188,10 +187,7 @@ func (boid *Boid) ApplyRules(restOfFlock []*Boid, walls_points []Vector2D, endpo
 
 		if d < endpointsPerception {
 			endpointsTotal++
-			diff := boid.position
-			diff.Subtract(point)
-			diff.Divide(d)
-			endpointsSteering.Add(diff)
+			endpointsSteering.Add(point)
 		}
 
 	}
@@ -264,15 +260,38 @@ func (boid *Boid) CheckEdges() {
 	}
 }
 
+func (boid *Boid) Escape(endpoints_points []Vector2D, i int) {
+
+	for _, endpoint := range endpoints_points {
+		xmin := endpoint.X - 15.0
+		xmax := endpoint.X + 15.0
+		ymin := endpoint.Y - 15.0
+		ymax := endpoint.Y + 15.0
+
+		x := boid.position.X
+		y := boid.position.Y
+
+		if x > xmin && x < xmax && y > ymin && y < ymax {
+			boid.position.X = math.NaN()
+			boid.position.Y = math.NaN()
+		}
+
+	}
+
+}
+
 type Flock struct {
 	boids []*Boid
 }
 
 func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) {
-	for _, boid := range flock.boids {
+	for i, boid := range flock.boids {
+
 		boid.CheckEdges()
 		boid.ApplyRules(flock.boids, walls_points, endpoints_points)
 		boid.ApplyMovement()
+		boid.Escape(endpoints_points, i)
+
 	}
 }
 
@@ -351,7 +370,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, endpoint := range g.endpoints_points {
 
-		vector.DrawFilledCircle(screen, float32(endpoint.X), float32(endpoint.Y), float32(5.0), color.Black)
+		ebitenutil.DrawRect(screen, endpoint.X-15, endpoint.Y-15, 15, 15, color.Black)
 
 	}
 

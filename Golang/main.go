@@ -23,7 +23,7 @@ type Time = time.Time
 const (
 	screenWidth          = 1000
 	screenHeight         = 1000
-	numBoids             = 100
+	numBoids             = 200
 	maxSpeed             = 4.0
 	alignForce           = 1.0
 	cohesionForce        = 0.8

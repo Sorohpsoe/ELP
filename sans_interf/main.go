@@ -400,6 +400,8 @@ func main() {
 	var wg sync.WaitGroup
 	resultCh := make(chan time.Duration, 30) // Canal pour recueillir les résultats
 
+	fmt.Println("Hello world")
+
 	// Lancer dix goroutines
 	for i := 0; i < 20; i++ {
 		wg.Add(1)

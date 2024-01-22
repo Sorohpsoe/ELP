@@ -1,33 +1,72 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, h1, ul, li, text)
 import Http
 import Json.Decode as Json exposing (Decoder, field, string)
 import Random exposing (Generator, int)
 
+
 type alias Model =
     { word : String
-    , definition : String
+    , definitions : List Definition
+    , wordResponses : List WordResponse
     }
 
 type Msg
-    = FetchDefinition (Result Http.Error String)
+    = FetchWords (Result Http.Error String)
+    | FetchDefinition (Result Http.Error WordResponse)
+    | WordGenerated (Maybe String)
 
-init : Model
-init =
-    { word = ""
-    , definition = ""
+type alias Definition =
+    { definition : String
+    , synonyms : List String
+    , antonyms : List String
     }
 
-update : Msg -> Model -> Model
+type alias Meaning =
+    { partOfSpeech : String
+    , definitions : List Definition
+    }
+
+type alias WordResponse =
+    { word : String
+    , meanings : List Meaning
+    }
+
+init : () -> (Model, Cmd Msg)
+init _ =
+    ( { word = "", definitions = [], wordResponses = [] }, Http.get { url = "words.txt", expect = Http.expectString FetchWords } )
+
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        FetchDefinition (Ok definition) ->
-            { model | definition = definition }
+        FetchWords (Ok words) ->
+            let
+                wordList = String.split " " words
+                cmd = Random.generate WordGenerated (randomWord wordList)
+            in
+            ( model, cmd )
+
+        FetchWords (Err _) ->
+            ( model, Cmd.none )
+
+        FetchDefinition (Ok wordResponse) ->
+            let
+                newDefinitions = List.concatMap (\meaning -> meaning.definitions) wordResponse.meanings
+            in
+            ( { model | definitions = newDefinitions ++ model.definitions, wordResponses = wordResponse :: model.wordResponses }, Cmd.none )
 
         FetchDefinition (Err _) ->
-            model
+            ( model, Cmd.none )
+
+        WordGenerated maybeWord ->
+            case maybeWord of
+                Just word ->
+                    ( { model | word = word }, fetchDefinitionCmd word )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 getAt : Int -> List a -> Maybe a
 getAt index list =
@@ -36,17 +75,53 @@ getAt index list =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [] [ text ("Word: " ++ model.word) ]
-        , div [] [ text ("Definition: " ++ model.definition) ]
+        [ h1 [] [ text model.word ]
+        , ul [] (List.concatMap viewWordResponse model.wordResponses)
         ]
 
-fetchDefinition : String -> Cmd Msg
-fetchDefinition word =
+viewWordResponse : WordResponse -> List (Html Msg)
+viewWordResponse wordResponse =
+    [ h1 [] [ text wordResponse.word ]
+    , ul [] (List.concatMap viewMeaning wordResponse.meanings)
+    ]
+
+viewMeaning : Meaning -> List (Html Msg)
+viewMeaning meaning =
+    [ li [] [ text meaning.partOfSpeech ]
+    , ul [] (List.concatMap viewDefinition meaning.definitions)
+    ]
+
+viewDefinition : Definition -> List (Html Msg)
+viewDefinition definition =
+    [ li [] [ text definition.definition ] ]
+
+
+fetchDefinitionCmd : String -> Cmd Msg
+fetchDefinitionCmd word =
     Http.get
         { url = "https://api.dictionaryapi.dev/api/v2/entries/en/" ++ word
-        , expect = Http.expectString FetchDefinition
+        , expect = Http.expectJson FetchDefinition wordDecoder
         }
 
+definitionDecoder : Decoder Definition
+definitionDecoder =
+    Json.map3 Definition
+        (Json.field "definition" Json.string)
+        (Json.field "synonyms" (Json.list Json.string))
+        (Json.field "antonyms" (Json.list Json.string))
+
+meaningDecoder : Decoder Meaning
+meaningDecoder =
+    Json.map2 Meaning
+        (Json.field "partOfSpeech" Json.string)
+        (Json.field "definitions" (Json.list definitionDecoder))
+
+wordDecoder : Decoder WordResponse
+wordDecoder =
+    Json.map2 WordResponse
+        (Json.field "word" Json.string)
+        (Json.field "meanings" (Json.list meaningDecoder))
+        
 randomWord : List String -> Generator (Maybe String)
 randomWord words =
     let
@@ -57,9 +132,9 @@ randomWord words =
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.element
         { init = init
         , update = update
         , view = view
+        , subscriptions = \_ -> Sub.none
         }
-

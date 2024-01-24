@@ -1,38 +1,35 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, div, h1, ul, li, text)
+import Browser.Navigation as Navigation
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
-import Json.Decode as Json exposing (Decoder, field, string)
-import Random exposing (Generator, int)
+import Random
+import Json.Decode exposing (..)
+import Json.Decode.Pipeline as JP
 
 
 type alias Model =
     { word : String
     , definitions : List Definition
-    , wordResponses : List WordResponse
+    , guess : String
+    }
+
+type alias Definition =
+    { partsOfSpeech : String
+    , definitions : List Definition
     }
 
 type Msg
     = FetchWords (Result Http.Error String)
-    | FetchDefinition (Result Http.Error WordResponse)
+    | FetchDefinition (Result Http.Error (List Word))
     | WordGenerated (Maybe String)
+    | GuessSubmitted (String)
+    | Reload
 
-type alias Definition =
-    { definition : String
-    , synonyms : List String
-    , antonyms : List String
-    }
 
-type alias Meaning =
-    { partOfSpeech : String
-    , definitions : List Definition
-    }
-
-type alias WordResponse =
-    { word : String
-    , meanings : List Meaning
-    }
 
 init : () -> (Model, Cmd Msg)
 init _ =
@@ -51,14 +48,7 @@ update msg model =
         FetchWords (Err _) ->
             ( model, Cmd.none )
 
-        FetchDefinition (Ok wordResponse) ->
-            let
-                newDefinitions = List.concatMap (\meaning -> meaning.definitions) wordResponse.meanings
-            in
-            ( { model | definitions = newDefinitions ++ model.definitions, wordResponses = wordResponse :: model.wordResponses }, Cmd.none )
-
-        FetchDefinition (Err _) ->
-            ( model, Cmd.none )
+        FetchDefinition 
 
         WordGenerated maybeWord ->
             case maybeWord of
@@ -67,6 +57,12 @@ update msg model =
 
                 Nothing ->
                     ( model, Cmd.none )
+
+getDefinition : String -> Cmd Msg
+getDefinition answer = Http.get
+    { url = "https://api.dictionaryapi.dev/api/v2/entries/en/" ++ answer
+    , expect = Http.expectJson FetchDefinition (Json.Decode.list wordDecoder)
+    }
 
 getAt : Int -> List a -> Maybe a
 getAt index list =

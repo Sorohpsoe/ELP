@@ -12,6 +12,11 @@ const player2Hand = [];
 const wordPool = [];
 const letterPool=[];
 
+ // Créer une interface de lecture pour lire l'entrée utilisateur
+ const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout})
+
 // Fill the word pool
 function fillWordPool() {
     try {
@@ -140,18 +145,13 @@ function canFormWord(word, existingLetters, addedLetters) {
 // Fonction pour échanger 3 lettres de la main du joueur
 function exchangeLetters(lettersInHand) {
 
-    // Créer une interface de lecture pour lire l'entrée utilisateur
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-});
-if (lettersInHand.length < 3) {
-    console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
-    return lettersInHand;
-}
+    if (lettersInHand.length < 3) {
+        console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
+        return lettersInHand;
+    }
 
-// Demander au joueur les 3 lettres à échanger
-rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
+    // Demander au joueur les 3 lettres à échanger
+    rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
     // Convertir les lettres entrées en majuscules et les séparer en tableau
     const lettersToExchange = input.trim().toUpperCase().split(' ');
 

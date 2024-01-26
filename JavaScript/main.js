@@ -60,11 +60,13 @@ function randomPlayer() {
     return Math.random() < 0.5 ? 'Player 1' : 'Player 2';
 }
 
-// Function to draw a letter from the letter pool
-function drawLetter() {
-    const randomIndex = Math.floor(Math.random() * letterPool.length);
-    const letter = letterPool.splice(randomIndex, 1)[0];
-    return letter;
+// Function to draw letters from the letter pool and add them to the hand
+function drawLetters(hand, numLetters) {
+    for (let i = 0; i < numLetters; i++) {
+        const randomIndex = Math.floor(Math.random() * letterPool.length);
+        const letter = letterPool.splice(randomIndex, 1)[0];
+        hand.push(letter);
+    }
 }
 
 // Function to display the board and letters in hand
@@ -231,12 +233,13 @@ function playGame() {
 
     while (!gameOver) {
         turn++;
-        console.log(`It's ${currentPlayer}'s turn.`);
+        console.log(`Turn ${turn} : It's ${currentPlayer}'s turn.`);
 
         if (turn < 2) {
             // Draw 6 letters
             for (let i = 0; i < 6; i++) {
                 drawLetter(currentPlayer);
+                //changer ça
             }
         } else {
             // Ask if player wants to jarnac
@@ -277,7 +280,6 @@ function playGame() {
         }
 
         currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
-        gameOver = isGameOver(player1Board, player2Board);
     }
 
     const player1Score = calculateScore(player1Board);
@@ -288,6 +290,8 @@ function playGame() {
     console.log(`Player 2 score: ${player2Score}`);
     console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 }
+
+
 function displayBoardAndLetters(playerName, playerBoard, lettersInHand) {
     console.log(`${playerName}'s Board:`);
     console.log(playerBoard);
@@ -296,16 +300,5 @@ function displayBoardAndLetters(playerName, playerBoard, lettersInHand) {
 }
 
 // Start the game
-//playGame();
+playGame();
 
-fillLetterPool();
-
-for (let i = 0; i < 6; i++) {
-    player1Hand.push(drawLetter())
-    player2Hand.push(drawLetter());
-}
-
-
-// Display player boards and hands
-displayBoardAndLetters('Player 1', player1Board, player1Hand);
-displayBoardAndLetters('Player 2', player2Board, player2Hand);

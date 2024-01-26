@@ -175,9 +175,8 @@ rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par d
 
     // Fermer l'interface de lecture
     rl.close();
-    lettersInHand.push(drawLetter())
-    lettersInHand.push(drawLetter())
-    lettersInHand.push(drawLetter())
+    drawLetters(lettersInHand,3)
+       
     // Afficher la nouvelle main du joueur
     console.log("Votre nouvelle main après l'échange :", lettersInHand);
 
@@ -237,10 +236,9 @@ function playGame() {
 
         if (turn < 2) {
             // Draw 6 letters
-            for (let i = 0; i < 6; i++) {
-                drawLetter(currentPlayer);
-                //changer ça
-            }
+            
+            drawLetters(currentPlayer,6);
+            
         } else {
             // Ask if player wants to jarnac
             const jarnacChoice = prompt('Do you want to jarnac? (yes/no)');
@@ -260,7 +258,7 @@ function playGame() {
         const drawOrSwitchChoice = prompt('Do you want to draw 1 letter or switch 3 letters? (draw/switch)');
         if (drawOrSwitchChoice.toLowerCase() === 'draw') {
             // Draw 1 letter
-            drawLetter(currentPlayer);
+            drawLetters(currentPlayer,1);
         } else if (drawOrSwitchChoice.toLowerCase() === 'switch') {
             // Switch 3 letters
             exchangeLetters(currentPlayer);

@@ -78,14 +78,16 @@ function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log(lettersInHand);
 }
 
+function emptyIndex(board) {
+    return playerBoard.findIndex((line) => line.length === 0);
+}
+
 // Function to check if a word can be played in the first empty line
 function canPlayWord(playerBoard, word) {
-    const emptyLineIndex = playerBoard.findIndex((line) => line.length === 0);
+    let emptyLineIndex = emptyIndex(playerBoard)
     if (emptyLineIndex === -1) {
         return false; // No empty line available
     }
-    // Check if the word can be played in the empty line
-
     return true;
 }
 // Function to check if a word is in the word pool
@@ -95,7 +97,7 @@ function isWordInPool(word) {
 
 // Function to play a word in the first empty line
 function playWord(playerBoard, word) {
-    const emptyLineIndex = playerBoard.findIndex((line) => line.length === 0);
+    let emptyLineIndex = emptyIndex(playerBoard)
     if (emptyLineIndex === -1) {
         return false; // No empty line available
     }
@@ -149,8 +151,6 @@ function exchangeLetters(lettersInHand) {
     console.log("test2")
     // Demander au joueur les 3 lettres à échanger
     rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
-        // Fermer l'interface de lecture
-        rl.close();
 
         // Convertir les lettres entrées en majuscules et les séparer en tableau
         const lettersToExchange = input.toUpperCase().split(' ');
@@ -177,17 +177,18 @@ function exchangeLetters(lettersInHand) {
 }
 
 
-// Function to check if a player can Jarnac the opponent's word
-function canJarnac(playerBoard, opponentBoard) {
-    // Check if the player can Jarnac the opponent's word
-
-    return true;
-}
 
 // Function to steal the opponent's word and place it on the player's board
-function jarnacAndSteal(opponentBoard) {
-    // Jarnac the opponent's word and steal it
+function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex) {
+    const existingWord = playerBoard[lineIndex];
 
+    if (canFormWord(existingWord, opponentBoard[lineIndex], letters) && isWordInPool(word)) {
+        let emptyLineIndex = emptyIndex(playerBoard);
+        playerBoard[emptyLineIndex] = existingWord;
+        opponentBoard[lineIndex] = "";
+        return true;
+    }
+    return false;
 }
 
 // Function to check if the game is over
@@ -214,12 +215,6 @@ function calculateScore(playerBoard) {
    }
 
 
-// Function to play a turn for a player
-function playTurn(playerBoard, opponentBoard, lettersInHand) {
-    // Play a turn for a player
-
-}
-
 // Main game loop
 function playGame() {
     let currentPlayer = randomPlayer();
@@ -229,24 +224,59 @@ function playGame() {
     let turn = 0;
 
     while (!gameOver) {
-        turn ++;
+        turn++;
         console.log(`It's ${currentPlayer}'s turn.`);
-        playTurn(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player2Board : player1Board, currentPlayer === 'Player 1' ? player2Hand : player1Hand);
+
+        if (turn < 2) {
+            // Draw 6 letters
+            for (let i = 0; i < 6; i++) {
+                drawLetter(currentPlayer);
+            }
+        } else {
+            // Ask if player wants to jarnac
+            const jarnacChoice = prompt('Do you want to jarnac? (yes/no)');
+            if (jarnacChoice.toLowerCase() === 'yes') {
+                // Perform jarnac action
+                // ...
+            } else {
+                // Check if opponent board has 8 filled lines
+                if (isGameOver(player1Board, player2Board)) {
+                    gameOver = true;
+                    break;
+                }
+            }
+        }
+
+        // Ask if player wants to draw 1 letter or switch 3 letters
+        const drawOrSwitchChoice = prompt('Do you want to draw 1 letter or switch 3 letters? (draw/switch)');
+        if (drawOrSwitchChoice.toLowerCase() === 'draw') {
+            // Draw 1 letter
+            drawLetter(currentPlayer);
+        } else if (drawOrSwitchChoice.toLowerCase() === 'switch') {
+            // Switch 3 letters
+            exchangeLetters(currentPlayer);
+        }
+
+        // Ask if player wants to play a word, add a letter, or stop turn
+        const actionChoice = prompt('Do you want to play a word, add a letter, or stop turn? (play/add/stop)');
+        if (actionChoice.toLowerCase() === 'play') {
+            // Play a word
+            // ...
+        } else if (actionChoice.toLowerCase() === 'add') {
+            // Add a letter
+            // ...
+        } else if (actionChoice.toLowerCase() === 'stop') {
+            // Stop turn
+            // ...
+        }
+
         currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
         gameOver = isGameOver(player1Board, player2Board);
     }
-
-    const player1Score = calculateScore(player1Board);
-    const player2Score = calculateScore(player2Board);
-
-    console.log('Game over!');
-    console.log(`Player 1 score: ${player1Score}`);
-    console.log(`Player 2 score: ${player2Score}`);
-    console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 }
-
 // Start the game
 //playGame();
 
 const playerHand = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+console.log("pute");
 exchangeLetters(playerHand)

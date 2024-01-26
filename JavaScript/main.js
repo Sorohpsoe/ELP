@@ -1,8 +1,22 @@
+const fs = require('fs');
+
 // Variables
 const player1Board = Array.from({ length: 9 }, () => []);
 const player2Board = Array.from({ length: 9 }, () => []);
-const lettersToPlay = [];
-const letterPool = [];
+const player1Hand = [];
+const player2Hand = [];
+const wordPool = [];
+
+// Fill the word pool
+function fillWordPool() {
+    try {
+        const data = fs.readFileSync('words/ods6.txt', 'utf8');
+        const words = data.split('\n');
+        wordPool.push(...words);
+    } catch (error) {
+        console.error('Error reading the file:', error);
+    }
+}
 
 // Function to fill the letter pool
 //There is : 14 A, 4 B, 7 C, 5 D, 19 E, 2 F, 4 G, 2 H, 11  I, 1 J, 1 K, 6 L, 5 M, 9 N, 8 O, 4 P, 1 Q, 10 R, 7 S, 9 T, 8 U, 2 V, 1 W, 1 X, 1 Y, 2 Z
@@ -63,7 +77,7 @@ function canPlayWord(playerBoard, word) {
         return false; // No empty line available
     }
     // Check if the word can be played in the empty line
-    // Implement your logic here
+
     return true;
 }
 
@@ -74,63 +88,65 @@ function playWord(playerBoard, word) {
         return false; // No empty line available
     }
     // Play the word in the empty line
-    // Implement your logic here
+
     return true;
 }
 
 // Function to add a letter to an existing word
 function addLetterToWord(playerBoard, lineIndex, wordIndex, letter) {
     // Add the letter to the specified word in the line
-    // Implement your logic here
+
 }
 
 // Function to exchange 3 letters from the player's hand
 function exchangeLetters(lettersInHand) {
     // Exchange 3 letters from the player's hand
-    // Implement your logic here
+
 }
 
 // Function to check if a player can Jarnac the opponent's word
 function canJarnac(playerBoard, opponentBoard) {
     // Check if the player can Jarnac the opponent's word
-    // Implement your logic here
+
     return true;
 }
 
 // Function to steal the opponent's word and place it on the player's board
 function jarnacAndSteal(playerBoard, opponentBoard) {
     // Jarnac the opponent's word and steal it
-    // Implement your logic here
+
 }
 
 // Function to check if the game is over
 function isGameOver(playerBoard, opponentBoard) {
     // Check if the game is over
-    // Implement your logic here
+
     return false;
 }
 
 // Function to calculate the score of a player
 function calculateScore(playerBoard) {
     // Calculate the score of a player
-    // Implement your logic here
+
     return 0;
 }
 
 // Function to play a turn for a player
 function playTurn(playerBoard, opponentBoard, lettersInHand) {
     // Play a turn for a player
-    // Implement your logic here
+
 }
 
 // Main game loop
 function playGame() {
     let currentPlayer = randomPlayer();
     let gameOver = false;
+    fillWordPool();
+    fillLetterPool();
 
     while (!gameOver) {
         console.log(`It's ${currentPlayer}'s turn.`);
-        playTurn(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player2Board : player1Board, lettersToPlay);
+        playTurn(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player2Board : player1Board, currentPlayer === 'Player 1' ? player2Hand : player1Hand);
         currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
         gameOver = isGameOver(player1Board, player2Board);
     }

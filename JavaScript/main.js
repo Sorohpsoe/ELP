@@ -1,4 +1,12 @@
 const fs = require('fs');
+const readline = require('readline');
+
+// Créer une interface de lecture pour lire l'entrée utilisateur
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 
 // Variables
 const player1Board = Array.from({ length: 9 }, () => []);
@@ -98,11 +106,46 @@ function addLetterToWord(playerBoard, lineIndex, wordIndex, letter) {
 
 }
 
-// Function to exchange 3 letters from the player's hand
+// Fonction pour échanger 3 lettres de la main du joueur
 function exchangeLetters(lettersInHand) {
-    // Exchange 3 letters from the player's hand
+    // Vérifier que le joueur a au moins 3 lettres dans sa main
+    console.log("test")
+    if (lettersInHand.length < 3) {
+        console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
+        return lettersInHand;
+    }
 
+
+    console.log("test2")
+    // Demander au joueur les 3 lettres à échanger
+    rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
+        // Fermer l'interface de lecture
+        rl.close();
+
+        // Convertir les lettres entrées en majuscules et les séparer en tableau
+        const lettersToExchange = input.toUpperCase().split(' ');
+
+        // Vérifier que le joueur a entré exactement 3 lettres
+        if (lettersToExchange.length !== 3) {
+            console.log("Veuillez entrer exactement 3 lettres.");
+            return lettersInHand;
+        }
+
+        // Supprimer les premières occurrences des lettres à échanger de la main du joueur
+        for (const letter of lettersToExchange) {
+            const index = lettersInHand.indexOf(letter);
+            if (index !== -1) {
+                lettersInHand.splice(index, 1);
+            } else {
+                console.log(`Lettre '${letter}' introuvable dans votre main.`);
+            }
+        }
+
+        // Afficher la nouvelle main du joueur
+        console.log("Votre nouvelle main après l'échange :", lettersInHand);
+    });
 }
+
 
 // Function to check if a player can Jarnac the opponent's word
 function canJarnac(playerBoard, opponentBoard) {
@@ -170,4 +213,7 @@ function playGame() {
 }
 
 // Start the game
-playGame();
+//playGame();
+
+const playerHand = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+exchangeLetters(playerHand)

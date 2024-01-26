@@ -221,7 +221,17 @@ function calculateScore(playerBoard) {
 function playTurn(playerBoard, opponentBoard, lettersInHand) {
     // Play a turn for a player
 
-}
+    rl.question("Do you want to exchange three letters? (yes/no): "), (answer) => {
+        rl.close();
+        if (answer.toLowerCase() === 'yes') {
+            // If the player wants to exchange, call the exchangeLetters function
+            exchangeLetters(lettersInHand);
+        } else {
+            // Otherwise, continue with the turn logic
+            // ... (rest of the code for the turn)
+        }
+    }
+} 
 
 // Main game loop
 function playGame() {
@@ -247,10 +257,24 @@ function playGame() {
     console.log(`Player 2 score: ${player2Score}`);
     console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 }
+function displayBoardAndLetters(playerName, playerBoard, lettersInHand) {
+    console.log(`${playerName}'s Board:`);
+    console.log(playerBoard);
+    console.log(`${playerName}'s Letters in hand:`);
+    console.log(lettersInHand);
+}
 
 // Start the game
 //playGame();
 
-const playerHand = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-fillLetterPool()
-exchangeLetters(playerHand)
+fillLetterPool();
+
+for (let i = 0; i < 6; i++) {
+    player1Hand.push(drawLetter())
+    player2Hand.push(drawLetter());
+}
+
+
+// Display player boards and hands
+displayBoardAndLetters('Player 1', player1Board, player1Hand);
+displayBoardAndLetters('Player 2', player2Board, player2Hand);

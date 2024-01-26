@@ -1,11 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 
-// Créer une interface de lecture pour lire l'entrée utilisateur
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+
 
 
 // Variables
@@ -14,6 +10,7 @@ const player2Board = Array.from({ length: 9 }, () => []);
 const player1Hand = [];
 const player2Hand = [];
 const wordPool = [];
+const letterPool=[];
 
 // Fill the word pool
 function fillWordPool() {
@@ -140,40 +137,49 @@ function canFormWord(word, existingLetters, addedLetters) {
 
 // Fonction pour échanger 3 lettres de la main du joueur
 function exchangeLetters(lettersInHand) {
-    // Vérifier que le joueur a au moins 3 lettres dans sa main
-    console.log("test")
-    if (lettersInHand.length < 3) {
-        console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
-        return lettersInHand;
+
+    // Créer une interface de lecture pour lire l'entrée utilisateur
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+});
+if (lettersInHand.length < 3) {
+    console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
+    return lettersInHand;
+}
+
+// Demander au joueur les 3 lettres à échanger
+rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
+    // Convertir les lettres entrées en majuscules et les séparer en tableau
+    const lettersToExchange = input.trim().toUpperCase().split(' ');
+
+    // Vérifier que le joueur a entré exactement 3 lettres
+    if (lettersToExchange.length !== 3) {
+        console.log("Veuillez entrer exactement 3 lettres.");
+        rl.close();
+        return;
+    }
+
+    // Supprimer les premières occurrences des lettres à échanger de la main du joueur
+    for (const letter of lettersToExchange) {
+        const index = lettersInHand.indexOf(letter);
+        if (index !== -1) {
+            lettersInHand.splice(index, 1);
+        } else {
+            console.log(`Lettre '${letter}' introuvable dans votre main.`);
+        }
     }
 
 
-    console.log("test2")
-    // Demander au joueur les 3 lettres à échanger
-    rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
+    // Fermer l'interface de lecture
+    rl.close();
+    lettersInHand.push(drawLetter())
+    lettersInHand.push(drawLetter())
+    lettersInHand.push(drawLetter())
+    // Afficher la nouvelle main du joueur
+    console.log("Votre nouvelle main après l'échange :", lettersInHand);
 
-        // Convertir les lettres entrées en majuscules et les séparer en tableau
-        const lettersToExchange = input.toUpperCase().split(' ');
-
-        // Vérifier que le joueur a entré exactement 3 lettres
-        if (lettersToExchange.length !== 3) {
-            console.log("Veuillez entrer exactement 3 lettres.");
-            return lettersInHand;
-        }
-
-        // Supprimer les premières occurrences des lettres à échanger de la main du joueur
-        for (const letter of lettersToExchange) {
-            const index = lettersInHand.indexOf(letter);
-            if (index !== -1) {
-                lettersInHand.splice(index, 1);
-            } else {
-                console.log(`Lettre '${letter}' introuvable dans votre main.`);
-            }
-        }
-
-        // Afficher la nouvelle main du joueur
-        console.log("Votre nouvelle main après l'échange :", lettersInHand);
-    });
+});
 }
 
 
@@ -273,10 +279,33 @@ function playGame() {
         currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
         gameOver = isGameOver(player1Board, player2Board);
     }
+
+    const player1Score = calculateScore(player1Board);
+    const player2Score = calculateScore(player2Board);
+
+    console.log('Game over!');
+    console.log(`Player 1 score: ${player1Score}`);
+    console.log(`Player 2 score: ${player2Score}`);
+    console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 }
+function displayBoardAndLetters(playerName, playerBoard, lettersInHand) {
+    console.log(`${playerName}'s Board:`);
+    console.log(playerBoard);
+    console.log(`${playerName}'s Letters in hand:`);
+    console.log(lettersInHand);
+}
+
 // Start the game
 //playGame();
 
-const playerHand = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-console.log("pute");
-exchangeLetters(playerHand)
+fillLetterPool();
+
+for (let i = 0; i < 6; i++) {
+    player1Hand.push(drawLetter())
+    player2Hand.push(drawLetter());
+}
+
+
+// Display player boards and hands
+displayBoardAndLetters('Player 1', player1Board, player1Hand);
+displayBoardAndLetters('Player 2', player2Board, player2Hand);

@@ -112,10 +112,19 @@ function isGameOver(playerBoard, opponentBoard) {
 
 // Function to calculate the score of a player
 function calculateScore(playerBoard) {
-    // Calculate the score of a player
-    // Implement your logic here
-    return 0;
-}
+       let playerScore = 0;
+
+       // Parcourir chaque mot dans le tableau du joueur
+       for (const word of playerBoard) {
+           // Calculer le score du mot (nombre de lettres au carré)
+           const wordScore = Math.pow(word.length, 2);
+   
+           playerScore += wordScore;
+       }
+   
+       return playerScore;
+   }
+
 
 // Function to play a turn for a player
 function playTurn(playerBoard, opponentBoard, lettersInHand) {

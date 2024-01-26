@@ -1,0 +1,49 @@
+-----------
+Variables :
+-----------
+
+8 listes par joueurs de 9 cases
+liste de lettres à jouer
+pioche de lettres (random)
+
+
+----------
+Fonction :
+----------
+
+Random choix joueur
+
+Piocher lettre
+
+Affichage plateau et lettres en main
+
+Tour d'un joueur :
+    Si 1er tour : 
+        Pioche 6 lettres (random)
+
+    Sinon :
+        Si adversaire à posé sur 8e ligne :
+            Jarnac : (cf. checkpoint1) + vol
+            Si : par jarnacké fin de jeu
+
+        Cas : 
+            - Pioche 1 lettre
+            - Echanger 3 lettres (exactement)
+        
+
+    
+    veut jouer = oui
+
+    While veut jouer :
+        Cas : (checkpoint1)
+            - Jouer un mot dans premier ligne vide.
+            - Rajouter lettre dans mot (changer le mot mais mm lettres)
+
+        
+
+        encore jouer ? -> oui, non
+    
+    Fin du tour -> Tour autre joueur.
+
+
+

@@ -236,7 +236,6 @@ function playGame() {
 
         if (turn < 2) {
             // Draw 6 letters
-            
             drawLetters(currentPlayer,6);
             
         } else {
@@ -290,13 +289,8 @@ function playGame() {
 }
 
 
-function displayBoardAndLetters(playerName, playerBoard, lettersInHand) {
-    console.log(`${playerName}'s Board:`);
-    console.log(playerBoard);
-    console.log(`${playerName}'s Letters in hand:`);
-    console.log(lettersInHand);
-}
-
 // Start the game
 playGame();
+
+
 

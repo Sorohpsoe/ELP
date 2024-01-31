@@ -323,8 +323,6 @@ function playGame() {
                 }
             })
         }
-
-
         currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
     }
 

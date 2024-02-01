@@ -399,6 +399,7 @@ func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup, endpointsname string, 
 
 	}
 	fmt.Println("Fin de la simulation", elapsed_time)
+
 	ch <- elapsed_time
 }
 
@@ -422,7 +423,7 @@ func handleConnection(conn net.Conn, index_conn int) {
 
 	// Lancer vingt goroutines pour traiter les données en parallele
 	var wg sync.WaitGroup
-	resultCh := make(chan time.Duration, 20) // Canal pour recueillir les résultats
+	resultCh := make(chan time.Duration, 100) // Canal pour recueillir les résultats
 
 	// Lancer vingt goroutines
 	for i := 0; i < 5; i++ {

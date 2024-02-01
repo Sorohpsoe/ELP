@@ -35,7 +35,7 @@ func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	// Specify the parent directory for the "walls" and "endpoints" folders
-	parentDir := "../data"
+	parentDir := "data"
 
 	// Process the first CSV file and save it to the "walls" folder
 	processCSV(conn, filepath.Join(parentDir, "walls"), "walls.csv")

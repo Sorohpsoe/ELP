@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"net"
 	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -33,11 +35,11 @@ const (
 	endpointsPerception  = 400.0
 )
 
-func init_walls() []Vector2D {
+func init_walls(wallsname string) []Vector2D {
 	// Ouverture du fichier CSV
 
 	pwd, _ := os.Getwd()
-	path := pwd + "/walls/walls.csv"
+	path := pwd + "\\data_received\\walls\\" + wallsname
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
@@ -79,10 +81,10 @@ func init_walls() []Vector2D {
 
 }
 
-func init_endpoints() []Vector2D {
+func init_endpoints(endpointsname string) []Vector2D {
 	// Ouverture du fichier CSV
 	pwd, _ := os.Getwd()
-	path := pwd + "/endpoints/endpoints.csv"
+	path := pwd + "\\data_received\\endpoints\\" + endpointsname
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
@@ -304,12 +306,12 @@ type Sim struct {
 	endpoints_points []Vector2D
 }
 
-func (g *Sim) init() {
+func (g *Sim) init(endpointsname string, wallsname string) {
 	defer func() {
 		g.inited = true
 	}()
-	g.walls_points = init_walls()
-	g.endpoints_points = init_endpoints()
+	g.walls_points = init_walls(wallsname)
+	g.endpoints_points = init_endpoints(endpointsname)
 	rand.Seed(time.Hour.Milliseconds())
 	g.flock.boids = make([]*Boid, numBoids)
 	for i := range g.flock.boids {
@@ -327,9 +329,9 @@ func (g *Sim) init() {
 	g.start = time.Now()
 }
 
-func (g *Sim) Update() time.Duration {
+func (g *Sim) Update(endpointsname string, wallsname string) time.Duration {
 	if !g.inited {
-		g.init()
+		g.init(endpointsname, wallsname)
 	}
 	now := time.Now()
 	duree := now.Sub(g.start)
@@ -349,9 +351,9 @@ func new_flock() *Flock {
 	return &flock
 }
 
-func new_sim() *Sim {
-	walls_points := init_walls()
-	endpoints_points := init_endpoints()
+func new_sim(endpointsname string, wallsname string) *Sim {
+	walls_points := init_walls(wallsname)
+	endpoints_points := init_endpoints(endpointsname)
 	rand.Seed(time.Hour.Milliseconds())
 	flock := new_flock()
 	for i := range flock.boids {
@@ -380,16 +382,16 @@ func new_sim() *Sim {
 	return &sim
 }
 
-func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup) {
+func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup, endpointsname string, wallsname string) {
 
 	defer wg.Done()
 
-	simulation := new_sim()
+	simulation := new_sim(endpointsname, wallsname)
 
 	var elapsed_time time.Duration
 
 	for {
-		elapsed_time = simulation.Update()
+		elapsed_time = simulation.Update(endpointsname, wallsname)
 		if simulation.ended {
 
 			break
@@ -400,16 +402,32 @@ func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup) {
 	ch <- elapsed_time
 }
 
-func main() {
+func handleConnection(conn net.Conn, index_conn int) {
+	// Close the connection when we're done
+	defer conn.Close()
+
+	// Specify the parent directory for the "walls" and "endpoints" folders
+	parentDir := "data_received"
+
+	// Generate the filename with the index_conn
+	wallsname := fmt.Sprintf("walls-%d.csv", index_conn)
+
+	// Process the CSV file and save it to the "walls" folder
+	processCSV(conn, filepath.Join(parentDir, "walls"), wallsname)
+
+	endpointsname := fmt.Sprintf("endpoints-%d.csv", index_conn)
+
+	// Process the second CSV file and save it to the "endpoints" folder
+	processCSV(conn, filepath.Join(parentDir, "endpoints"), endpointsname)
+
+	// Lancer vingt goroutines pour traiter les données en parallele
 	var wg sync.WaitGroup
-	resultCh := make(chan time.Duration, 30) // Canal pour recueillir les résultats
+	resultCh := make(chan time.Duration, 20) // Canal pour recueillir les résultats
 
-	fmt.Println("Hello world")
-
-	// Lancer dix goroutines
-	for i := 0; i < 20; i++ {
+	// Lancer vingt goroutines
+	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		go run_sim(resultCh, &wg)
+		go run_sim(resultCh, &wg, endpointsname, wallsname)
 	}
 
 	// Calculer la moyenne des résultats
@@ -420,10 +438,96 @@ func main() {
 		count++
 	}
 
+	averageDuration := time.Duration(0)
 	if count > 0 {
-		averageDuration := totalDuration / time.Duration(count)
+		averageDuration = totalDuration / time.Duration(count)
 		fmt.Println("Moyenne des durées:", averageDuration)
 	} else {
 		fmt.Println("Aucun résultat n'a été reçu.")
 	}
+
+	conn.Write([]byte(fmt.Sprintf("Terminé. Durée moyenne: %v", averageDuration)))
+
+}
+
+func processCSV(conn net.Conn, folderName, filename string) {
+	// Create a buffer to store incoming data
+	buf := make([]byte, 1024)
+	var fileContent []byte
+
+	// Read incoming data until the end
+	for {
+		n, err := conn.Read(buf)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// Append the received data to the fileContent slice
+		fileContent = append(fileContent, buf[:n]...)
+
+		// Check if we've reached the end of the file
+		if n < len(buf) {
+			break
+		}
+	}
+
+	// Create the folder if it doesn't exist
+	err := os.MkdirAll(folderName, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Save the received data to a CSV file in the specified folder
+	err = saveToFile(fileContent, filepath.Join(folderName, filename))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
+func saveToFile(data []byte, filename string) error {
+	// Open the file for writing
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Write the data to the file
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
+
+	// Listen for incoming connections on port 8080
+	ln, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	index_conn := 0
+
+	// Accept incoming connections and handle them
+	for {
+		conn, err := ln.Accept()
+
+		index_conn++
+
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		// Handle the connection in a new goroutine
+		go handleConnection(conn, index_conn)
+	}
+
 }

@@ -4,9 +4,31 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 func main() {
+	// Check if the correct number of command-line arguments is provided
+	if len(os.Args) != 3 {
+		fmt.Println("Usage: go run client.go <csv_walls.csv> <csv_endpoints.csv>")
+		return
+	}
+
+	wallsname := os.Args[1]
+	endpointsname := os.Args[2]
+
+	if !strings.HasSuffix(wallsname, ".csv") {
+		wallsname += ".csv"
+	}
+
+	if !strings.HasSuffix(endpointsname, ".csv") {
+		endpointsname += ".csv"
+	}
+
+	pwd, _ := os.Getwd()
+	pathendpoints := pwd + "/data_to_send/endpoints/" + endpointsname
+	pathwalls := pwd + "/data_to_send/walls/" + wallsname
+
 	// Connect to the server
 	conn, err := net.Dial("tcp", "localhost:8080")
 	if err != nil {
@@ -15,10 +37,10 @@ func main() {
 	}
 
 	// Send the first CSV file to the server
-	sendCSVFile(conn, "/data_to_send/test1.csv")
+	sendCSVFile(conn, pathwalls)
 
 	// Send the second CSV file to the server
-	sendCSVFile(conn, "/data_to_send/test2.csv")
+	sendCSVFile(conn, pathendpoints)
 
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)

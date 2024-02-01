@@ -47,3 +47,4 @@ Tour d'un joueur :
 
 
 
+A la place des callback on fait des Async et  await. 

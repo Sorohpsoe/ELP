@@ -35,7 +35,10 @@ const (
 
 func init_walls() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("Golang/walls/walls.csv")
+
+	pwd, _ := os.Getwd()
+	path := pwd + "/walls/walls.csv"
+	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -78,7 +81,9 @@ func init_walls() []Vector2D {
 
 func init_endpoints() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("Golang/endpoints/endpoints.csv")
+	pwd, _ := os.Getwd()
+	path := pwd + "/endpoints/endpoints.csv"
+	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -331,7 +336,6 @@ func (g *Sim) Update() time.Duration {
 	if g.flock.Logic(g.walls_points, g.endpoints_points) {
 
 		g.ended = true
-		fmt.Println("coucou ended")
 	}
 	return duree
 }

@@ -15,10 +15,10 @@ func main() {
 	}
 
 	// Send the first CSV file to the server
-	sendCSVFile(conn, "test1.csv")
+	sendCSVFile(conn, "/data_to_send/test1.csv")
 
 	// Send the second CSV file to the server
-	sendCSVFile(conn, "test2.csv")
+	sendCSVFile(conn, "/data_to_send/test2.csv")
 
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf)

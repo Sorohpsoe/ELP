@@ -17,6 +17,7 @@ function playWord(playerBoard, word) {
         return false; // No empty line available
     }
     // Play the word in the empty line
+    playerBoard[emptyLineIndex] = word;
 
     return true;
 }

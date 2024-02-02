@@ -42,7 +42,7 @@ export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand
     
     if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word,wordPool)) {
         playerBoard[lineIndex] = updatedWord;
-        removeLettersFromHand(letters, playerHand);
+        removeLettersFromHand(playerHand, letters);
         //a check
     }
 }

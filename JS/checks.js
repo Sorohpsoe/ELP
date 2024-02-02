@@ -1,7 +1,7 @@
 
 
 // Function to check if the game is over
-function isGameOver(playerBoard, opponentBoard) {
+export function isGameOver(playerBoard, opponentBoard) {
     const playerLinesCompleted = playerBoard.filter(line => line !== "").length;
     const opponentLinesCompleted = opponentBoard.filter(line => line !== "").length;
 
@@ -9,7 +9,7 @@ function isGameOver(playerBoard, opponentBoard) {
 }
 
 // Function to check if a word can be formed with the letters in the playerBoard at index lineIndex and the added letters
-function canFormWord(word, existingLetters, addedLetters) {
+export function canFormWord(word, existingLetters, addedLetters) {
     const allLetters = existingLetters.concat(addedLetters);
     const wordLetters = word.split('');
     
@@ -33,7 +33,7 @@ function canFormWord(word, existingLetters, addedLetters) {
 
 
 // Function to check if a word can be played in the first empty line
-function canPlayWord(playerBoard, word) {
+export function canPlayWord(playerBoard, word) {
     let emptyLineIndex = emptyIndex(playerBoard)
     if (emptyLineIndex === -1) {
         return false; // No empty line available
@@ -42,11 +42,11 @@ function canPlayWord(playerBoard, word) {
 }
 
 // Function to check if a word is in the word pool
-function isWordInPool(word) {
+export function isWordInPool(word) {
     return wordPool.includes(word);
 }
 
 
-function emptyIndex(board) {
+export function emptyIndex(board) {
     return playerBoard.findIndex((line) => line.length === 0);
 }

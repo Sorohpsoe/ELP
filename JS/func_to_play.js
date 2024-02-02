@@ -1,6 +1,6 @@
 import * as checks from './checks.js';
 
-const readline = require('readline');
+import rl from 'readline';
 
 // Function to draw letters from the letter pool and add them to the hand
 export function drawLetters(hand, numLetters) {

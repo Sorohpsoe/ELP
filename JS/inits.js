@@ -2,7 +2,7 @@ const fs = require('fs');
 
 
 // Fill the word pool
-function fillWordPool() {
+export function fillWordPool() {
     try {
         const data = fs.readFileSync('words/ods6.txt', 'utf8');
         const words = data.split('\n');
@@ -13,7 +13,7 @@ function fillWordPool() {
 }
 
 // Function to randomly choose a player
-function randomPlayer() {
+export function randomPlayer() {
     return Math.random() < 0.5 ? 'Player 1' : 'Player 2';
 }
 
@@ -21,7 +21,7 @@ function randomPlayer() {
 
 // Function to fill the letter pool
 //There is : 14 A, 4 B, 7 C, 5 D, 19 E, 2 F, 4 G, 2 H, 11  I, 1 J, 1 K, 6 L, 5 M, 9 N, 8 O, 4 P, 1 Q, 10 R, 7 S, 9 T, 8 U, 2 V, 1 W, 1 X, 1 Y, 2 Z
-function fillLetterPool() {
+export function fillLetterPool() {
     letterPool.push(...Array(14).fill('A'));
     letterPool.push(...Array(4).fill('B'));
     letterPool.push(...Array(7).fill('C'));

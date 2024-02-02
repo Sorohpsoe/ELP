@@ -36,7 +36,7 @@ To run the Guess.it game, follow the steps below:
 2. Navigate to the main project folder named "ELM":
 
    ```bash
-   cd Guess.it
+   cd ELM
    ```
 
 3. Open a terminal or command prompt in the project directory.

@@ -1,3 +1,6 @@
+const fs = require('fs');
+
+
 // Fill the word pool
 export function fillWordPool(wordPool) {
     try {

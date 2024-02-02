@@ -43,7 +43,7 @@ var (
 
 func init_walls() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("Golang/walls/walls.csv")
+	file, err := os.Open("code/with_interface/walls.csv")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -86,7 +86,7 @@ func init_walls() []Vector2D {
 
 func init_endpoints() []Vector2D {
 	// Ouverture du fichier CSV
-	file, err := os.Open("Golang/endpoints/endpoints.csv")
+	file, err := os.Open("code/with_interface/endpoints.csv")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}
@@ -116,7 +116,7 @@ func init_endpoints() []Vector2D {
 }
 
 func init() {
-	fish, _, err := ebitenutil.NewImageFromFile("Golang/fish/chevron-up.png", ebiten.FilterDefault)
+	fish, _, err := ebitenutil.NewImageFromFile("code/with_interface/chevron-up.png", ebiten.FilterDefault)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -301,7 +301,6 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 		boid.ApplyMovement()
 		if boid.Escape(endpoints_points, i) {
 			flock.nb_escaped++
-			fmt.Print(flock.nb_escaped, "/", numBoids, " boids échappés")
 		}
 
 	}
@@ -319,12 +318,14 @@ type Game struct {
 	inited           bool
 	walls_points     []Vector2D
 	endpoints_points []Vector2D
+	ended            bool
 }
 
 func (g *Game) init() {
 	defer func() {
 		g.inited = true
 	}()
+	g.ended = true
 	g.walls_points = init_walls()
 	g.endpoints_points = init_endpoints()
 	rand.Seed(time.Hour.Milliseconds())
@@ -351,9 +352,13 @@ func (g *Game) Update(screen *ebiten.Image) error {
 	}
 
 	if g.flock.Logic(g.walls_points, g.endpoints_points) {
-		end := time.Now()
-		duree := end.Sub(g.start)
-		fmt.Println("Fin du jeu", duree)
+		if g.ended == false {
+			end := time.Now()
+			duree := end.Sub(g.start)
+			fmt.Println("Fin du jeu", duree)
+		}
+
+		g.ended = true
 	}
 	return nil
 }
@@ -363,7 +368,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op := ebiten.DrawImageOptions{}
 	w, h := birdImage.Size()
 
-	file, err := os.Open("Golang/walls/walls.csv")
+	file, err := os.Open("code/with_interface/walls.csv")
 	if err != nil {
 		fmt.Println("Erreur lors de l'ouverture du fichier CSV :", err)
 	}

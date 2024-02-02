@@ -3,6 +3,5 @@
     "version": "1.0.0",
     "description": "ELP project",
     "main": "main.js",
-    "type": "module",
-    "author": "Gauthier DEVERGNE matteo.devergne@insa-lyon.fr  Baptiste ROUGETET baptiste.rougetet@insa-lyon.fr"
+    "type": "module"
 }

@@ -47,6 +47,7 @@ export function isWordInPool(word, wordPool) {
     return wordPool.includes(uppercaseWord);
 }
 
+// Function to check if the letters of a word are in the player's hand
 export function isLettersInHand(word, playerHand) {
     const uppercaseWord = word.toUpperCase();
     const wordLetters = uppercaseWord.split('');
@@ -62,7 +63,7 @@ export function isLettersInHand(word, playerHand) {
     return true;
 }
 
-
+// Function to check if a line is empty
 export function emptyIndex(playerBoard) {
     return playerBoard.findIndex((line) => line.length === 0);
 }

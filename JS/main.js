@@ -22,10 +22,10 @@ const rl = readline.createInterface({
 
 // Main game loop
 
-let currentPlayer = funcToPlay.randomPlayer();
+let currentPlayer = inits.randomPlayer();
 let gameOver = false;
 inits.fillWordPool();
-fillLetterPool();
+inits.fillLetterPool();
 let turn = 0;
 
 while (!gameOver) {
@@ -33,13 +33,13 @@ while (!gameOver) {
     console.log(`Turn ${turn} : It's ${currentPlayer}'s turn.`);
     
     //afficher
-    displayBoardAndLetters(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player1Hand : player2Hand);
+    funcToPlay.displayBoardAndLetters(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player1Hand : player2Hand);
     let opponentBoard = currentPlayer === 'Player 1' ?player2Board : player1Board;
     let playerBoard = currentPlayer === 'Player 1' ?player1Board : player2Board;
 
     if (turn < 2) {
         // Draw 6 letters
-        drawLetters(currentPlayer,6);
+        funcToPlay.drawLetters(currentPlayer,6);
         
     } else {
         // Ask if player wants to jarnac
@@ -61,7 +61,7 @@ while (!gameOver) {
                             console.log('Be careful you only have one chance to jarnac, check your answer before submitting it.');
                             rl.question('Which letters do you want to add to the selected word ? ',(jarnacLetters)=>{
                                 rl.question('Which new word do you have in mind ? ',(jarnacWord)=>{
-                                    if (jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine)) {
+                                    if (funcToPlay.jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine)) {
                                         console.log('Jarnac successful!');
                                     } else {
                                         console.log('Jarnac failed!');
@@ -88,10 +88,10 @@ while (!gameOver) {
 
         if (drawOrSwitchChoice.toLowerCase() === 'draw') {
             // Draw 1 letter
-            drawLetters(currentPlayer,1);
+            funcToPlay.drawLetters(currentPlayer,1);
         } else if (drawOrSwitchChoice.toLowerCase() === 'switch') {
             // Switch 3 letters
-            exchangeLetters(currentPlayer);
+            funcToPlay.exchangeLetters(currentPlayer);
         }
     })
 
@@ -102,7 +102,7 @@ while (!gameOver) {
         rl.question('Do you want to play a word, add a letter, or stop turn? (play/add/stop)',(actionChoice)=>{
             if (actionChoice.toLowerCase() === 'play') {
                 rl.question('Which word do you want to play ?',(wordToPlay)=>{
-                    if (playWord(playerBoard, wordToPlay)) {
+                    if (funcToPlay.playWord(playerBoard, wordToPlay)) {
                         console.log('Word played successfully!');
                     } else {
                         console.log('Word could not be played!');
@@ -112,7 +112,7 @@ while (!gameOver) {
                 rl.question('Which line do you want to add a word to ?',(lineToAdd)=>{
                     rl.question('Which letters do you want to add to the word ?',(lettersToAdd)=>{
                         rl.question('Which new word do you want put on the line ?',(wordToAdd)=>{
-                            addLetterToWord(playerBoard, lineToAdd, wordToAdd, lettersToAdd);
+                            funcToPlay.addLetterToWord(playerBoard, lineToAdd, wordToAdd, lettersToAdd);
                         })
                     })
                 })
@@ -124,8 +124,8 @@ while (!gameOver) {
     currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
 }
 
-const player1Score = calculateScore(player1Board);
-const player2Score = calculateScore(player2Board);
+const player1Score = funcToPlay.calculateScore(player1Board);
+const player2Score = funcToPlay.calculateScore(player2Board);
 
 console.log('Game over!');
 console.log(`Player 1 score: ${player1Score}`);
@@ -134,5 +134,3 @@ console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 
 
 
 
-// Start the game
-//playGame();

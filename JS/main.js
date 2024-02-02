@@ -29,7 +29,7 @@ while (!gameOver) {
 
     if (turn < 2) {
         // Draw 6 letters
-        funcToPlay.drawLetters(currentPlayer,6);
+        funcToPlay.drawLetters(currentPlayer,6,letterPool);
         
     } else {
         // Ask if player wants to jarnac
@@ -73,7 +73,7 @@ while (!gameOver) {
 
     if (drawOrSwitchChoice.toLowerCase() === 'draw') {
         // Draw 1 letter
-        funcToPlay.drawLetters(currentPlayer,1);
+        funcToPlay.drawLetters(currentPlayer,1,letterPool);
     } else if (drawOrSwitchChoice.toLowerCase() === 'switch') {
         // Switch 3 letters
         funcToPlay.exchangeLetters(currentPlayer);

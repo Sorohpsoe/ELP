@@ -10,27 +10,26 @@ export function isGameOver(playerBoard, opponentBoard) {
 
 // Function to check if a word can be formed with the letters in the playerBoard at index lineIndex and the added letters
 export function canFormWord(word, existingLetters, addedLetters) {
-    const allLetters = existingLetters.concat(addedLetters);
+    let allLettersString = existingLetters.concat(addedLetters);
     const wordLetters = word.split('');
     
-    if (wordLetters.length > allLetters.length) {
+    if (wordLetters.length > allLettersString.length) {
         return false; // Not enough letters to form the word
     }
     
     for (let i = 0; i < wordLetters.length; i++) {
         const letter = wordLetters[i];
-        const letterIndex = allLetters.indexOf(letter);
+        const letterIndex = allLettersString.indexOf(letter);
         
         if (letterIndex === -1) {
             return false; // Letter not found in the given letters
         }
         
-        allLetters.splice(letterIndex, 1);
+        allLettersString = allLettersString.slice(0, letterIndex) + allLettersString.slice(letterIndex + 1); // Remove the letter from the string
     }
     
     return true;
 }
-
 
 // Function to check if a word can be played in the first empty line
 export function canPlayWord(playerBoard, word) {

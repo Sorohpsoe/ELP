@@ -24,6 +24,8 @@ let turn = 0;
 funcToPlay.drawLetters(player1Hand, 5, letterPool);
 funcToPlay.drawLetters(player2Hand, 5, letterPool);
 
+const validJarnacLines = ["0","1","2","3","4","5","6","7"]
+
 while (!gameOver) {
     turn++;
     console.log(`Turn ${turn} : It's ${currentPlayer}'s turn.`);
@@ -35,7 +37,7 @@ while (!gameOver) {
     let opponentBoard = currentPlayer === 'Player 1' ?player2Board : player1Board;
     let playerBoard = currentPlayer === 'Player 1' ?player1Board : player2Board;
     let playerHand = currentPlayer === 'Player 1' ?player1Hand : player2Hand;
- 
+    let opponentHand = currentPlayer === 'Player 1' ?player2Hand : player1Hand;
         
     if (turn > 1) {
         // Ask if player wants to jarnac
@@ -44,22 +46,35 @@ while (!gameOver) {
 
         if (jarnacChoice.toLowerCase() === 'yes') {
             let canJarnac = false;
+            const validJarnacLines = ["0","1","2","3","4","5","6","7"]
             while (!canJarnac){
-                const jarnacLine = await funcToPlay.askQuestion('Which one of your opponent line do you want to jarnac ? (1/2/3/...)');
-
-                if(opponentBoard[jarnacLine].length ===0) {
-                    console.log('This line is empty, you can\'t jarnac it.');
-                }
-                else {
+                const jarnacLine = await funcToPlay.askQuestion('Which one of your opponent line do you want to jarnac, jarnac a new word or stop ? (0/1/2/3/... /play/stop)');
+                if (jarnacLine === 'stop') {
                     canJarnac = true;
-                    console.log('Be careful you only have one chance to jarnac, check your answer before submitting it.');
-                    const jarnacLetters = await funcToPlay.askQuestion('Which letters do you want to add to the selected word ? ');
-                    const jarnacWord = await funcToPlay.askQuestion('Which new word do you have in mind ? ');
+                } else if (jarnacLine === 'play') {
+                    const wordToPlay = await funcToPlay.askQuestion('Which word do you want to play ?');
 
-                    if (funcToPlay.jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine,letterPool)) {
-                        console.log('Jarnac successful!');
+                    if (funcToPlay.playWord(playerBoard, wordToPlay,wordPool,opponentHand,letterPool)) {  
+                        console.log('Word played successfully!');
                     } else {
-                        console.log('Jarnac failed!');
+                        console.log('Word could not be played!');
+                    };
+                } else  {
+                    if (validJarnacLines.includes(jarnacLine)) {
+                        if (opponentBoard[jarnacLine] !== "") {
+                            const jarnacLetters = await funcToPlay.askQuestion('Which letters do you want to add to the selected word ? ');
+                            const jarnacWord = await funcToPlay.askQuestion('Which new word do you have in mind ? ');
+        
+                            if (funcToPlay.jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine,letterPool)) {
+                                console.log('Jarnac successful!');
+                            } else {
+                                console.log('Jarnac failed!');
+                            }
+                        } else {
+                            console.log('This line is empty, you can\'t jarnac it.');
+                        }
+                    } else {
+                        console.log('Invalid line number');
                     }
                 }
             }
@@ -97,10 +112,16 @@ while (!gameOver) {
             }
         } else if (actionChoice.toLowerCase() === 'add') {
             const lineToAdd = await funcToPlay.askQuestion('Which line do you want to add a word to ?');
+
+            if (validJarnacLines.includes(lineToAdd)) {
+
             const lettersToAdd = await funcToPlay.askQuestion('Which letters do you want to add to the word ?');
             const wordToAdd = await funcToPlay.askQuestion('Which new word do you want put on the line ?');
-
             funcToPlay.addLetterToWord(playerBoard, lineToAdd, wordToAdd, lettersToAdd,playerHand,wordToAdd,wordPool);
+            } else {
+                console.log('Invalid line number');
+            }
+
 
         } else if (actionChoice.toLowerCase() === 'stop') {
             wantToContinue = false 

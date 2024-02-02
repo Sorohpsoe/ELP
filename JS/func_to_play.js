@@ -37,12 +37,13 @@ export function playWord(playerBoard, word,wordPool,playerHand,letterPool) {
 
 
 // Function to add a letter to an existing word
-export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand,updatedWord,wordP) {
+export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand,updatedWord,wordPool) {
+    
     
     if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word,wordPool)) {
         playerBoard[lineIndex] = updatedWord;
         removeLettersFromHand(letters, playerHand);
-        
+        //a check
     }
 }
 

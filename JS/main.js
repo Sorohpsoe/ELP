@@ -14,8 +14,8 @@ const letterPool=[];
 // Main game loop
 let currentPlayer = inits.randomPlayer();
 let gameOver = false;
-inits.fillWordPool();
-inits.fillLetterPool();
+inits.fillWordPool(wordPool);
+inits.fillLetterPool(letterPool);
 let turn = 0;
 
 while (!gameOver) {

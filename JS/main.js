@@ -151,5 +151,6 @@ console.log(`Player 1 score: ${player1Score}`);
 console.log(`Player 2 score: ${player2Score}`);
 console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 
+funcToPlay.fermer_readline();
 
 

@@ -1,5 +1,6 @@
 import * as checks from './checks.js';
 
+const readline = require('readline');
 
 // Function to draw letters from the letter pool and add them to the hand
 function drawLetters(hand, numLetters) {
@@ -39,7 +40,13 @@ function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log(lettersInHand);
 }
 
-
+function askQuestion(question) {
+    return new Promise((resolve, reject) => {
+        rl.question(question, (answer) => {
+            resolve(answer);
+        });
+    });
+}
 
 // Function to calculate the score of a player
 function calculateScore(playerBoard) {
@@ -57,23 +64,23 @@ function calculateScore(playerBoard) {
    }
    
 
+   
 // Fonction pour échanger 3 lettres de la main du joueur
-function exchangeLetters(lettersInHand) {
-/// A changer pour faire des whiles piur les vérifications
+async function exchangeLetters(lettersInHand) {
     if (lettersInHand.length < 3) {
         console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
         return lettersInHand;
     }
 
     // Demander au joueur les 3 lettres à échanger
-    rl.question("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ", (input) => {
+    const input = await askQuestion("Entrez les 3 lettres que vous souhaitez échanger, séparées par des espaces : ");
+
     // Convertir les lettres entrées en majuscules et les séparer en tableau
     const lettersToExchange = input.trim().toUpperCase().split(' ');
 
     // Vérifier que le joueur a entré exactement 3 lettres
     if (lettersToExchange.length !== 3) {
         console.log("Veuillez entrer exactement 3 lettres.");
-        rl.close();
         return;
     }
 
@@ -87,15 +94,10 @@ function exchangeLetters(lettersInHand) {
         }
     }
 
+    drawLetters(lettersInHand, 3);
 
-    // Fermer l'interface de lecture
-    rl.close();
-    drawLetters(lettersInHand,3)
-       
     // Afficher la nouvelle main du joueur
     console.log("Votre nouvelle main après l'échange :", lettersInHand);
-
-});
 }
 
 

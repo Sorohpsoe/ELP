@@ -1,6 +1,6 @@
 import * as checks from './checks.js';
 
-import rl from 'readline';
+import * as rl from 'readline';
 
 // Function to draw letters from the letter pool and add them to the hand
 export function drawLetters(hand, numLetters,letterPool) {
@@ -39,6 +39,7 @@ export function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log('Letters in hand:');
     console.log(lettersInHand);
 }
+
 
 export function askQuestion(question) {
     return new Promise((resolve, reject) => {

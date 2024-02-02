@@ -1,9 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
-
-
-
-
+ 
 // Variables
 const player1Board = Array.from({ length: 9 }, () => []);
 const player2Board = Array.from({ length: 9 }, () => []);
@@ -13,7 +10,7 @@ const wordPool = [];
 const letterPool=[];
 
  // Créer une interface de lecture pour lire l'entrée utilisateur
- const rl = readline.createInterface({
+const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout})
 

@@ -19,7 +19,7 @@ export function drawLetters(hand, numLetters,letterPool) {
 }
 
 // Function to play a word in the first empty line
-export function playWord(playerBoard, word,wordPool,playerHand) {
+export function playWord(playerBoard, word,wordPool,playerHand,letterPool) {
     let canPlay = checks.isWordInPool(word,wordPool)
     let haveLetters = checks.isLettersInHand(word,playerHand)
     let emptyLineIndex = checks.emptyIndex(playerBoard)
@@ -27,7 +27,7 @@ export function playWord(playerBoard, word,wordPool,playerHand) {
         return false; // No empty line available
     }
     // Play the word in the empty line
-    removeLettersFromHand(playerHand,wordToPlay)
+    removeLettersFromHand(playerHand,word)
     drawLetters(playerHand,1,letterPool)
     playerBoard[emptyLineIndex] = word;
 

@@ -85,7 +85,7 @@ while (!gameOver) {
         if (actionChoice.toLowerCase() === 'play') {
             const wordToPlay = await funcToPlay.askQuestion('Which word do you want to play ?');
 
-            if (funcToPlay.playWord(playerBoard, wordToPlay,wordPool,playerHand)) {  
+            if (funcToPlay.playWord(playerBoard, wordToPlay,wordPool,playerHand,letterPool)) {  
                 console.log('Word played successfully!');
             } else {
                 console.log('Word could not be played!');

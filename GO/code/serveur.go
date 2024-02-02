@@ -27,12 +27,12 @@ const (
 	cohesionForce        = 0.8
 	separationForce      = 1.8
 	wallsForce           = 3.0
-	endpointsForce       = 6
+	endpointsForce       = 0.9
 	alignPerception      = 75.0
 	cohesionPerception   = 100.0
 	separationPerception = 50.0
 	wallsPerception      = 50.0
-	endpointsPerception  = 400.0
+	endpointsPerception  = 350.0
 )
 
 func init_walls(wallsname string) []Vector2D {
@@ -290,7 +290,7 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 
 	}
 
-	if flock.nb_escaped+1 == numBoids {
+	if flock.nb_escaped+3 == numBoids {
 		end = true
 	}
 
@@ -299,7 +299,7 @@ func (flock *Flock) Logic(walls_points []Vector2D, endpoints_points []Vector2D) 
 
 type Sim struct {
 	flock            Flock
-	start            time.Time
+	start            int
 	inited           bool
 	ended            bool
 	walls_points     []Vector2D
@@ -326,20 +326,25 @@ func (g *Sim) init(endpointsname string, wallsname string) {
 			acceleration: Vector2D{X: 0, Y: 0},
 		}
 	}
-	g.start = time.Now()
+	g.start = 0
 }
 
-func (g *Sim) Update(endpointsname string, wallsname string) time.Duration {
+func (g *Sim) Update(endpointsname string, wallsname string) int {
 	if !g.inited {
 		g.init(endpointsname, wallsname)
 	}
-	now := time.Now()
-	duree := now.Sub(g.start)
-	if g.flock.Logic(g.walls_points, g.endpoints_points) {
 
+	g.start++
+
+	if g.flock.Logic(g.walls_points, g.endpoints_points) {
 		g.ended = true
 	}
-	return duree
+
+	if g.start > 5001 {
+		g.ended = true
+	}
+
+	return g.start
 }
 
 func new_flock() *Flock {
@@ -368,7 +373,7 @@ func new_sim(endpointsname string, wallsname string) *Sim {
 			acceleration: Vector2D{X: 0, Y: 0},
 		}
 	}
-	start := time.Now()
+	start := 0
 
 	sim := Sim{
 		flock:            *flock,
@@ -382,16 +387,21 @@ func new_sim(endpointsname string, wallsname string) *Sim {
 	return &sim
 }
 
-func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup, endpointsname string, wallsname string) {
+var (
+	mutex sync.Mutex
+)
+
+func run_sim(ch chan<- int, wg *sync.WaitGroup, endpointsname string, wallsname string) {
 
 	defer wg.Done()
 
 	simulation := new_sim(endpointsname, wallsname)
 
-	var elapsed_time time.Duration
+	var elapsed_time int
 
 	for {
 		elapsed_time = simulation.Update(endpointsname, wallsname)
+
 		if simulation.ended {
 
 			break
@@ -399,8 +409,9 @@ func run_sim(ch chan<- time.Duration, wg *sync.WaitGroup, endpointsname string, 
 
 	}
 	fmt.Println("Fin de la simulation", elapsed_time)
-
+	mutex.Lock()
 	ch <- elapsed_time
+	mutex.Unlock()
 }
 
 func handleConnection(conn net.Conn, index_conn int) {
@@ -423,25 +434,30 @@ func handleConnection(conn net.Conn, index_conn int) {
 
 	// Lancer vingt goroutines pour traiter les données en parallele
 	var wg sync.WaitGroup
-	resultCh := make(chan time.Duration, 100) // Canal pour recueillir les résultats
+	resultCh := make(chan int, 100) // Canal pour recueillir les résultats
 
 	// Lancer vingt goroutines
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go run_sim(resultCh, &wg, endpointsname, wallsname)
 	}
-
+	wg.Add(1)
+	run_sim(resultCh, &wg, endpointsname, wallsname)
+	// Attendre que toutes les goroutines se terminent
 	// Calculer la moyenne des résultats
-	var totalDuration time.Duration
+	var totalDuration int
 	var count int
-	for i := 0; i < 5; i++ {
-		totalDuration += <-resultCh
-		count++
+	for i := 0; i < 10; i++ {
+		tick := <-resultCh
+		if tick < 5001 {
+			totalDuration += tick
+			count++
+		}
 	}
-
-	averageDuration := time.Duration(0)
+	wg.Wait()
+	averageDuration := 0
 	if count > 0 {
-		averageDuration = totalDuration / time.Duration(count)
+		averageDuration = totalDuration / count
 		fmt.Println("Moyenne des durées:", averageDuration)
 	} else {
 		fmt.Println("Aucun résultat n'a été reçu.")

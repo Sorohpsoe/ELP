@@ -3,7 +3,7 @@ import * as checks from './checks.js';
 import rl from 'readline';
 
 // Function to draw letters from the letter pool and add them to the hand
-export function drawLetters(hand, numLetters) {
+export function drawLetters(hand, numLetters,letterPool) {
     for (let i = 0; i < numLetters; i++) {
         const randomIndex = Math.floor(Math.random() * letterPool.length);
         const letter = letterPool.splice(randomIndex, 1)[0];
@@ -25,7 +25,6 @@ export function playWord(playerBoard, word) {
 
 // Function to add a letter to an existing word
 export function addLetterToWord(playerBoard, lineIndex, word, letters) {
-    const existingWord = playerBoard[lineIndex];
     
     if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word)) {
         playerBoard[lineIndex] = updatedWord;

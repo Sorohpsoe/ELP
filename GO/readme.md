@@ -12,6 +12,8 @@ The project is organized into several directories and files:
     - `endpoints.csv`: File specifying the destination coordinates for evacuation.
     - `walls.csv`: File specifying the locations of walls in the simulation.
     - `main.go`: Simulation with an interface to visualize the simulation.
+  - `client.go` Script for the to send data to the server
+  - `server.go` Script listen for client, simulate and give time of the simulation
 
 - **data_received:**
   - **endpoints:** Folder storing the `endpoints.csv` files received from clients.

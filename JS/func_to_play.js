@@ -37,12 +37,12 @@ export function playWord(playerBoard, word,wordPool,playerHand,letterPool) {
 
 
 // Function to add a letter to an existing word
-export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand,updatedWord,wordP) {
+export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand,updatedWord,wordPool) {
+    
     
     if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word,wordPool)) {
         playerBoard[lineIndex] = updatedWord;
-        removeLettersFromHand(letters, playerHand);
-        
+        removeLettersFromHand(playerHand, letters);
     }
 }
 
@@ -72,6 +72,7 @@ export function askQuestion(question) {
             resolve(answer);
         });
     });
+    
 }
 
 // Function to calculate the score of a player
@@ -139,4 +140,8 @@ export function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIn
         return true;
     }
     return false;
+}
+
+export function fermer_readline () {
+    rl.close()
 }

@@ -1,10 +1,15 @@
 import * as funcToPlay from './func_to_play.js';
 import * as inits from './inits.js';
 import * as checks from './checks.js';
+
+import readline from 'readline';
+
+
+
  
 // Variables
-let player1Board = ["" , "" , "" , "" , "" , "" , "" , "" , ""];
-let player2Board = ["" , "" , "" , "" , "" , "" , "" , "" , ""];
+let player1Board = ["test" , "test" , "test" , "test" , "tests" , "test" , "test" , "test" , ""];
+let player2Board = ["test" , "test" , "test" , "" , "" , "" , "" , "" , ""];
 let player1Hand = [];
 let player2Hand = [];
 let wordPool = [];
@@ -18,7 +23,6 @@ let gameOver = false;
 inits.fillWordPool(wordPool);
 inits.fillLetterPool(letterPool);
 
-console.log(checks.isLettersInHand('HELLO', ['h', 'E', 'L', 'L', 'O']));
 let turn = 0;
 
 funcToPlay.drawLetters(player1Hand, 5, letterPool);
@@ -151,6 +155,6 @@ console.log(`Player 1 score: ${player1Score}`);
 console.log(`Player 2 score: ${player2Score}`);
 console.log(`The winner is ${player1Score > player2Score ? 'Player 1' : 'Player 2'}`);
 
+
+
 funcToPlay.fermer_readline();
-
-

@@ -1,6 +1,13 @@
 import * as checks from './checks.js';
 
-import rl from 'readline';
+import readline from 'readline';
+
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 
 // Function to draw letters from the letter pool and add them to the hand
 export function drawLetters(hand, numLetters,letterPool) {

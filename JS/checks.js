@@ -46,6 +46,20 @@ export function isWordInPool(word) {
     return wordPool.includes(word);
 }
 
+export function isLettersInHand(word, playerHand) {
+    const wordLetters = word.split('');
+    let playerHand_temp = playerHand.slice(); // Make a copy of playerHand
+    for (let i = 0; i < wordLetters.length; i++) {
+        const letter = wordLetters[i];
+        const letterIndex = playerHand_temp.indexOf(letter);
+        if (letterIndex === -1) {
+            return false; // Letter not found in the given letters
+        }
+        playerHand_temp.splice(letterIndex, 1);
+    }
+    return true;
+}
+
 
 export function emptyIndex(board) {
     return playerBoard.findIndex((line) => line.length === 0);

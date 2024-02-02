@@ -74,7 +74,7 @@ export function calculateScore(playerBoard) {
 
    
 // Fonction pour échanger 3 lettres de la main du joueur
-export async function exchangeLetters(lettersInHand) {
+export async function exchangeLetters(lettersInHand,letterPool) {
     if (lettersInHand.length < 3) {
         console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
         return lettersInHand;
@@ -102,7 +102,7 @@ export async function exchangeLetters(lettersInHand) {
         }
     }
 
-    drawLetters(lettersInHand, 3);
+    drawLetters(lettersInHand, 3,letterPool);
 
     // Afficher la nouvelle main du joueur
     console.log("Votre nouvelle main après l'échange :", lettersInHand);

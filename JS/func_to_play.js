@@ -23,7 +23,7 @@ export function playWord(playerBoard, word,wordPool,playerHand,letterPool) {
     let canPlay = checks.isWordInPool(word,wordPool)
     let haveLetters = checks.isLettersInHand(word,playerHand)
     let emptyLineIndex = checks.emptyIndex(playerBoard)
-    if (emptyLineIndex === -1 && !canPlay && !haveLetters && word.length<3) { 
+    if (emptyLineIndex === -1 || !canPlay || !haveLetters || word.length<3) { 
         return false; // No empty line available
     }
     // Play the word in the empty line

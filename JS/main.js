@@ -18,14 +18,17 @@ let gameOver = false;
 inits.fillWordPool(wordPool);
 inits.fillLetterPool(letterPool);
 
+console.log(checks.isLettersInHand('HELLO', ['h', 'E', 'L', 'L', 'O']));
 let turn = 0;
 
-funcToPlay.drawLetters(player1Hand, 6, letterPool);
-funcToPlay.drawLetters(player2Hand, 6, letterPool);
+funcToPlay.drawLetters(player1Hand, 5, letterPool);
+funcToPlay.drawLetters(player2Hand, 5, letterPool);
 
 while (!gameOver) {
     turn++;
     console.log(`Turn ${turn} : It's ${currentPlayer}'s turn.`);
+
+
         
     
     //afficher
@@ -53,7 +56,7 @@ while (!gameOver) {
                     const jarnacLetters = await funcToPlay.askQuestion('Which letters do you want to add to the selected word ? ');
                     const jarnacWord = await funcToPlay.askQuestion('Which new word do you have in mind ? ');
 
-                    if (funcToPlay.jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine)) {
+                    if (funcToPlay.jarnacAndSteal(opponentBoard,playerBoard, jarnacWord, jarnacLetters, jarnacLine,letterPool)) {
                         console.log('Jarnac successful!');
                     } else {
                         console.log('Jarnac failed!');
@@ -74,6 +77,8 @@ while (!gameOver) {
 
     let wantToContinue = true;
     let letterChanged = false;
+
+    funcToPlay.drawLetters(playerHand, 1, letterPool);
 
     while (wantToContinue) {
         funcToPlay.displayBoardAndLetters(playerBoard, playerHand);

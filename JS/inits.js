@@ -3,7 +3,7 @@ import * as fs  from 'fs';
 // Fill the word pool
 export function fillWordPool(wordPool) {
     try {
-        const data = fs.readFileSync('words/ods6.txt', 'utf8');
+        const data = fs.readFileSync('words/pli07.txt', 'utf8');
         const words = data.split('\n');
         wordPool.push(...words);
     } catch (error) {

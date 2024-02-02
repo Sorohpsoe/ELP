@@ -42,13 +42,15 @@ export function canPlayWord(playerBoard, word) {
 }
 
 // Function to check if a word is in the word pool
-export function isWordInPool(word,wordPool) {
-    return wordPool.includes(word);
+export function isWordInPool(word, wordPool) {
+    const uppercaseWord = word.toUpperCase();
+    return wordPool.includes(uppercaseWord);
 }
 
 export function isLettersInHand(word, playerHand) {
-    const wordLetters = word.split('');
-    let playerHand_temp = playerHand.slice(); // Make a copy of playerHand
+    const uppercaseWord = word.toUpperCase();
+    const wordLetters = uppercaseWord.split('');
+    const playerHand_temp = playerHand.map(letter => letter.toUpperCase()); // Convert each letter in playerHand to uppercase
     for (let i = 0; i < wordLetters.length; i++) {
         const letter = wordLetters[i];
         const letterIndex = playerHand_temp.indexOf(letter);

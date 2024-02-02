@@ -129,10 +129,10 @@ export async function exchangeLetters(lettersInHand,letterPool) {
 
 
 // Function to steal the opponent's word and place it on the player's board
-export function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex) {
+export function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex,letterPool) {
     const existingWord = playerBoard[lineIndex];
 
-    if (checks.canFormWord(existingWord, opponentBoard[lineIndex], letters) && checks.isWordInPool(word)) {
+    if (checks.canFormWord(existingWord, opponentBoard[lineIndex], letters) && checks.isWordInPool(word,letterPool)) {
         let emptyLineIndex = checks.emptyIndex(playerBoard);
         playerBoard[emptyLineIndex] = existingWord;
         opponentBoard[lineIndex] = "";

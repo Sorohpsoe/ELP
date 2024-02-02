@@ -26,10 +26,11 @@ while (!gameOver) {
     funcToPlay.displayBoardAndLetters(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player1Hand : player2Hand);
     let opponentBoard = currentPlayer === 'Player 1' ?player2Board : player1Board;
     let playerBoard = currentPlayer === 'Player 1' ?player1Board : player2Board;
+    let playerHand = currentPlayer === 'Player 1' ?player1Hand : player2Hand;
 
     if (turn < 2) {
         // Draw 6 letters
-        funcToPlay.drawLetters(currentPlayer,6,letterPool);
+        funcToPlay.drawLetters(playerHand,6,letterPool);
         
     } else {
         // Ask if player wants to jarnac

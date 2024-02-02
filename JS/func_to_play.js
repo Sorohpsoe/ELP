@@ -47,6 +47,7 @@ export function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log(lettersInHand);
 }
 
+
 export function askQuestion(question) {
     return new Promise((resolve, reject) => {
         rl.question(question, (answer) => {

@@ -3,7 +3,7 @@ import * as checks from './checks.js';
 const readline = require('readline');
 
 // Function to draw letters from the letter pool and add them to the hand
-function drawLetters(hand, numLetters) {
+export function drawLetters(hand, numLetters) {
     for (let i = 0; i < numLetters; i++) {
         const randomIndex = Math.floor(Math.random() * letterPool.length);
         const letter = letterPool.splice(randomIndex, 1)[0];
@@ -12,7 +12,7 @@ function drawLetters(hand, numLetters) {
 }
 
 // Function to play a word in the first empty line
-function playWord(playerBoard, word) {
+export function playWord(playerBoard, word) {
     let emptyLineIndex = checks.emptyIndex(playerBoard)
     if (emptyLineIndex === -1) {
         return false; // No empty line available
@@ -24,7 +24,7 @@ function playWord(playerBoard, word) {
 }
 
 // Function to add a letter to an existing word
-function addLetterToWord(playerBoard, lineIndex, word, letters) {
+export function addLetterToWord(playerBoard, lineIndex, word, letters) {
     const existingWord = playerBoard[lineIndex];
     
     if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word)) {
@@ -34,14 +34,14 @@ function addLetterToWord(playerBoard, lineIndex, word, letters) {
 
 
 // Function to display the board and letters in hand
-function displayBoardAndLetters(playerBoard, lettersInHand) {
+export function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log('Board:');
     console.log(playerBoard);
     console.log('Letters in hand:');
     console.log(lettersInHand);
 }
 
-function askQuestion(question) {
+export function askQuestion(question) {
     return new Promise((resolve, reject) => {
         rl.question(question, (answer) => {
             resolve(answer);
@@ -50,7 +50,7 @@ function askQuestion(question) {
 }
 
 // Function to calculate the score of a player
-function calculateScore(playerBoard) {
+export function calculateScore(playerBoard) {
        let playerScore = 0;
 
        // Parcourir chaque mot dans le tableau du joueur
@@ -67,7 +67,7 @@ function calculateScore(playerBoard) {
 
    
 // Fonction pour échanger 3 lettres de la main du joueur
-async function exchangeLetters(lettersInHand) {
+export async function exchangeLetters(lettersInHand) {
     if (lettersInHand.length < 3) {
         console.log("Vous n'avez pas suffisamment de lettres pour effectuer un échange.");
         return lettersInHand;
@@ -104,7 +104,7 @@ async function exchangeLetters(lettersInHand) {
 
 
 // Function to steal the opponent's word and place it on the player's board
-function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex) {
+export function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex) {
     const existingWord = playerBoard[lineIndex];
 
     if (checks.canFormWord(existingWord, opponentBoard[lineIndex], letters) && checks.isWordInPool(word)) {

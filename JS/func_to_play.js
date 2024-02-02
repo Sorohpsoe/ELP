@@ -1,3 +1,6 @@
+import * as checks from './checks.js';
+
+
 // Function to draw letters from the letter pool and add them to the hand
 function drawLetters(hand, numLetters) {
     for (let i = 0; i < numLetters; i++) {
@@ -9,7 +12,7 @@ function drawLetters(hand, numLetters) {
 
 // Function to play a word in the first empty line
 function playWord(playerBoard, word) {
-    let emptyLineIndex = emptyIndex(playerBoard)
+    let emptyLineIndex = checks.emptyIndex(playerBoard)
     if (emptyLineIndex === -1) {
         return false; // No empty line available
     }
@@ -22,7 +25,7 @@ function playWord(playerBoard, word) {
 function addLetterToWord(playerBoard, lineIndex, word, letters) {
     const existingWord = playerBoard[lineIndex];
     
-    if (canFormWord(updatedWord, playerBoard[lineIndex], letters) && isWordInPool(word)) {
+    if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word)) {
         playerBoard[lineIndex] = updatedWord;
     }
 }
@@ -101,8 +104,8 @@ function exchangeLetters(lettersInHand) {
 function jarnacAndSteal(opponentBoard, playerBoard, word, letters, lineIndex) {
     const existingWord = playerBoard[lineIndex];
 
-    if (canFormWord(existingWord, opponentBoard[lineIndex], letters) && isWordInPool(word)) {
-        let emptyLineIndex = emptyIndex(playerBoard);
+    if (checks.canFormWord(existingWord, opponentBoard[lineIndex], letters) && checks.isWordInPool(word)) {
+        let emptyLineIndex = checks.emptyIndex(playerBoard);
         playerBoard[emptyLineIndex] = existingWord;
         opponentBoard[lineIndex] = "";
         return true;

@@ -19,22 +19,30 @@ export function drawLetters(hand, numLetters,letterPool) {
 }
 
 // Function to play a word in the first empty line
-export function playWord(playerBoard, word) {
+export function playWord(playerBoard, word,wordPool,playerHand) {
+    let canPlay = checks.isWordInPool(word,wordPool)
+    let haveLetters = checks.isLettersInHand(word,playerHand)
     let emptyLineIndex = checks.emptyIndex(playerBoard)
-    if (emptyLineIndex === -1) {
+    if (emptyLineIndex === -1 && !canPlay && !haveLetters) { 
         return false; // No empty line available
     }
     // Play the word in the empty line
+    removeLettersFromHand(playerHand,wordToPlay)
+    drawLetters(playerHand,1,letterPool)
     playerBoard[emptyLineIndex] = word;
 
     return true;
 }
 
+
+
 // Function to add a letter to an existing word
-export function addLetterToWord(playerBoard, lineIndex, word, letters) {
+export function addLetterToWord(playerBoard, lineIndex, word, letters,playerHand,updatedWord,wordP) {
     
-    if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word)) {
+    if (checks.canFormWord(updatedWord, playerBoard[lineIndex], letters) && checks.isWordInPool(word,wordPool)) {
         playerBoard[lineIndex] = updatedWord;
+        removeLettersFromHand(letters, playerHand);
+        
     }
 }
 
@@ -47,6 +55,16 @@ export function displayBoardAndLetters(playerBoard, lettersInHand) {
     console.log(lettersInHand);
 }
 
+// Function to remove letters of a word from a player's hand
+export function removeLettersFromHand(lettersInHand, word) {
+    for (const letter of word) {
+        const uppercaseLetter = letter.toUpperCase();
+        const index = lettersInHand.indexOf(uppercaseLetter);
+        if (index !== -1) {
+            lettersInHand.splice(index, 1);
+        }
+    }
+}
 
 export function askQuestion(question) {
     return new Promise((resolve, reject) => {
@@ -70,8 +88,8 @@ export function calculateScore(playerBoard) {
    
        return playerScore;
    }
-   
 
+   
    
 // Fonction pour échanger 3 lettres de la main du joueur
 export async function exchangeLetters(lettersInHand) {

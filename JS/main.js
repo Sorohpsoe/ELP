@@ -3,36 +3,38 @@ import * as inits from './inits.js';
 import * as checks from './checks.js';
  
 // Variables
-const player1Board = [[] , [] , [] , [] , [] , [] , [] , [] , []];
-const player2Board = [[] , [] , [] , [] , [] , [] , [] , [] , []];
-const player1Hand = [];
-const player2Hand = [];
-const wordPool = [];
-const letterPool=[];
+let player1Board = ["" , "" , "" , "" , "" , "" , "" , "" , ""];
+let player2Board = ["" , "" , "" , "" , "" , "" , "" , "" , ""];
+let player1Hand = [];
+let player2Hand = [];
+let wordPool = [];
+let letterPool=[];
 
 
 // Main game loop
 let currentPlayer = inits.randomPlayer();
 let gameOver = false;
+
 inits.fillWordPool(wordPool);
 inits.fillLetterPool(letterPool);
+
 let turn = 0;
+
+funcToPlay.drawLetters(player1Hand, 6, letterPool);
+funcToPlay.drawLetters(player2Hand, 6, letterPool);
 
 while (!gameOver) {
     turn++;
     console.log(`Turn ${turn} : It's ${currentPlayer}'s turn.`);
+        
     
     //afficher
-    funcToPlay.displayBoardAndLetters(currentPlayer === 'Player 1' ? player1Board : player2Board, currentPlayer === 'Player 1' ? player1Hand : player2Hand);
     let opponentBoard = currentPlayer === 'Player 1' ?player2Board : player1Board;
     let playerBoard = currentPlayer === 'Player 1' ?player1Board : player2Board;
     let playerHand = currentPlayer === 'Player 1' ?player1Hand : player2Hand;
-
-    if (turn < 2) {
-        // Draw 6 letters
-        funcToPlay.drawLetters(playerHand,6,letterPool);
+ 
         
-    } else {
+    if (turn > 1) {
         // Ask if player wants to jarnac
 
         const jarnacChoice = await funcToPlay.askQuestion('Do you want to jarnac? (yes/no)');
@@ -60,7 +62,7 @@ while (!gameOver) {
             }
         } else {
             // Check if opponent board has 8 filled lines
-            if (isGameOver(player1Board, player2Board)) {
+            if (checks.isGameOver(player1Board, player2Board)) {
                 gameOver = true;
 
             }
@@ -69,27 +71,21 @@ while (!gameOver) {
 
     if (gameOver) {break}
 
-    // Ask if player wants to draw 1 letter or switch 3 letters
-    const drawOrSwitchChoice = await funcToPlay.askQuestion('Do you want to draw 1 letter or switch 3 letters? (draw/switch)');
-
-    if (drawOrSwitchChoice.toLowerCase() === 'draw') {
-        // Draw 1 letter
-        funcToPlay.drawLetters(currentPlayer,1,letterPool);
-    } else if (drawOrSwitchChoice.toLowerCase() === 'switch') {
-        // Switch 3 letters
-        funcToPlay.exchangeLetters(currentPlayer);
-    }
 
     let wantToContinue = true;
+    let letterChanged = false;
 
     while (wantToContinue) {
+        funcToPlay.displayBoardAndLetters(playerBoard, playerHand);
         // Ask if player wants to play a word, add a letter, or stop turn
-        const actionChoice = await funcToPlay.askQuestion('Do you want to play a word, add a letter, or stop turn? (play/add/stop)');
+
+
+        const actionChoice = await funcToPlay.askQuestion('Do you want to play a word, add a letter, stop turn, or change 3 letters? (play/add/stop/change)');
 
         if (actionChoice.toLowerCase() === 'play') {
             const wordToPlay = await funcToPlay.askQuestion('Which word do you want to play ?');
 
-            if (funcToPlay.playWord(playerBoard, wordToPlay)) {
+            if (funcToPlay.playWord(playerBoard, wordToPlay,wordPool,playerHand)) {  
                 console.log('Word played successfully!');
             } else {
                 console.log('Word could not be played!');
@@ -99,9 +95,23 @@ while (!gameOver) {
             const lettersToAdd = await funcToPlay.askQuestion('Which letters do you want to add to the word ?');
             const wordToAdd = await funcToPlay.askQuestion('Which new word do you want put on the line ?');
 
-            funcToPlay.addLetterToWord(playerBoard, lineToAdd, wordToAdd, lettersToAdd);
+            funcToPlay.addLetterToWord(playerBoard, lineToAdd, wordToAdd, lettersToAdd,playerHand,wordToAdd,wordPool);
+
         } else if (actionChoice.toLowerCase() === 'stop') {
             wantToContinue = false 
+        } else if (actionChoice.toLowerCase() === 'change') {
+            if (letterChanged) {
+                console.log('You can only change 3 letters once per turn');
+            } else {
+                const lettersToChange = await funcToPlay.askQuestion('Which letters do you want to change? (Provide exactly 3 letters)');
+                if (lettersToChange.length !== 3) {
+                    console.log('Please provide exactly 3 letters.');
+                } else {
+                    funcToPlay.removeLettersFromHand(playerHand, lettersToChange);
+                    funcToPlay.drawLetters(playerHand, 3, letterPool);
+                    letterChanged = true;
+                }
+            }
         }
     }
     currentPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';

@@ -42,11 +42,11 @@ export function canPlayWord(playerBoard, word) {
 }
 
 // Function to check if a word is in the word pool
-export function isWordInPool(word) {
+export function isWordInPool(word,wordPool) {
     return wordPool.includes(word);
 }
 
 
-export function emptyIndex(board) {
+export function emptyIndex(playerBoard) {
     return playerBoard.findIndex((line) => line.length === 0);
 }
